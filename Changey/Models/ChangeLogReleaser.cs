@@ -8,7 +8,7 @@ namespace Changey.Models
 {
 	internal interface IChangeLogReleaser
 	{
-		Task<bool> Release(string path, string date, string version);
+		Task<bool> Release(string path, string? date, string version);
 	}
 
 	internal class ChangeLogReleaser : IChangeLogReleaser
@@ -19,7 +19,7 @@ namespace Changey.Models
 			_changeLogSerializer = changeLogSerializer;
 		}
 
-		public async Task<bool> Release(string path, string date, string version)
+		public async Task<bool> Release(string path, string? date, string version)
 		{
 			var releaseDate = DetermineDate(date);
 			_logger.Verbose($"Releasing version {version} on {releaseDate} in {path}");
@@ -42,7 +42,7 @@ namespace Changey.Models
 			return true;
 		}
 
-		private DateTime DetermineDate(string date) => string.IsNullOrEmpty(date)
+		private DateTime DetermineDate(string? date) => string.IsNullOrEmpty(date)
 			? DateTime.Now
 			: DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
