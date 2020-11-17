@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using CommandLine;
 
 namespace Changey
 {
+	[ExcludeFromCodeCoverage]
 	internal static class Program
 	{
 		private static async Task Main(string[] args)

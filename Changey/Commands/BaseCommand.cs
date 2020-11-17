@@ -24,8 +24,13 @@ namespace Changey.Commands
 		[Option('v', Default = false, HelpText = "Enable verbose log output")]
 		public bool Verbose { get; }
 
-		protected ILogger Logger { get; }
+		protected ILogger Logger { get; private set; }
 
 		public abstract Task Execute();
+
+		internal void InjectLogger(ILogger logger)
+		{
+			Logger = logger;
+		}
 	}
 }
