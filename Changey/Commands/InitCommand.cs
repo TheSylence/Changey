@@ -10,12 +10,12 @@ namespace Changey.Commands
 	internal class InitCommand : BaseCommand
 	{
 		[ExcludeFromCodeCoverage]
-		public InitCommand(bool semVer, bool verbose, bool silent, string path)
-			: this(semVer, verbose, silent, path, null)
+		public InitCommand(bool semVer, string path, bool silent, bool verbose)
+			: this(semVer, path, silent, verbose, null)
 		{
 		}
 
-		public InitCommand(bool semVer, bool verbose, bool silent, string path, IChangeLogCreator? changeLogCreator)
+		public InitCommand(bool semVer, string path, bool silent, bool verbose, IChangeLogCreator? changeLogCreator)
 			: base(verbose, silent, path)
 		{
 			SemVer = semVer;

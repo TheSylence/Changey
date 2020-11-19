@@ -17,9 +17,14 @@ namespace Changey.Services
 		public async Task<bool> Release(string path, string? date, string version)
 		{
 			var releaseDate = DetermineDate(date);
-			_logger.Verbose($"Releasing version {version} on {releaseDate} in {path}");
+			_logger.Verbose($"Releasing version {version} on {releaseDate.Date} in {path}");
 
 			var changeLog = await _changeLogSerializer.Deserialize(path);
+
+			foreach (var changeLogVersion in changeLog.Versions)
+			{
+				_logger.Verbose($"Existing version: {changeLogVersion.Name}");
+			}
 
 			var unreleased = changeLog.Versions.FirstOrDefault(v => v.ReleaseDate == null);
 			if (unreleased == null)

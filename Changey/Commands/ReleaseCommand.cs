@@ -10,16 +10,17 @@ namespace Changey.Commands
 	internal class ReleaseCommand : BaseCommand
 	{
 		[ExcludeFromCodeCoverage]
-		public ReleaseCommand(string version, string? date, bool verbose, bool silent, string path)
-			: this(version, date, verbose, silent, path, null)
+		public ReleaseCommand(string? date, string name, string path, bool silent, bool verbose)
+			: this(date, name, path, silent, verbose, null)
 		{
 		}
 
-		public ReleaseCommand(string version, string? date, bool verbose, bool silent, string path,
+		public ReleaseCommand(string? date, string name, string path,
+			bool silent, bool verbose,
 			IChangeLogReleaser? changeLogReleaser)
 			: base(verbose, silent, path)
 		{
-			Version = version;
+			Name = name;
 			Date = date;
 
 			_changeLogReleaser =
@@ -30,14 +31,14 @@ namespace Changey.Commands
 			Default = null)]
 		public string? Date { get; }
 
-		[Option('v', HelpText = "Name of the version to release.", Required = true)]
-		public string Version { get; }
+		[Option('n', HelpText = "Name of the version to release.", Required = true)]
+		public string Name { get; }
 
 		public override async Task Execute()
 		{
 			try
 			{
-				if (!await _changeLogReleaser.Release(Path, Date, Version))
+				if (!await _changeLogReleaser.Release(Path, Date, Name))
 					Logger.Warning("Could not release version");
 				else
 					Logger.Verbose("Released version");

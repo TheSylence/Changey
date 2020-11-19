@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -20,8 +19,6 @@ namespace Changey
 			var commandTypes = loader.LoadCommandTypes().ToArray();
 
 			await Parser.Default.ParseArguments(args, commandTypes).WithParsedAsync(Run);
-
-			Console.ReadLine();
 		}
 
 		private static async Task Run(object arg)

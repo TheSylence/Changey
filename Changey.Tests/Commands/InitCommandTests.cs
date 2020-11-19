@@ -14,7 +14,7 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var changeLogCreator = Substitute.For<IChangeLogCreator>();
-			var sut = new InitCommand(true, false, false, "file.name", changeLogCreator);
+			var sut = new InitCommand(true, "file.name", false, false, changeLogCreator);
 
 			// Act
 			await sut.Execute();
@@ -32,7 +32,7 @@ namespace Changey.Tests.Commands
 			changeLogCreator.CreateChangelog(Arg.Any<string>(), Arg.Any<bool>())
 				.Returns(Task.FromException(new Exception("test-exception")));
 
-			var sut = new InitCommand(true, false, false, "file.name", changeLogCreator);
+			var sut = new InitCommand(true, "file.name", false, false, changeLogCreator);
 
 			var logger = Substitute.For<ILogger>();
 			sut.InjectLogger(logger);

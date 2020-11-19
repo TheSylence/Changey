@@ -169,7 +169,7 @@ namespace Changey.Services
 			{
 				var version = new Version
 				{
-					Name = match.Groups[0].Value
+					Name = match.Groups[1].Value
 				};
 
 				if (!string.IsNullOrEmpty(match.Groups[2].Value))
@@ -194,7 +194,7 @@ namespace Changey.Services
 						break;
 				}
 
-				offset = nextVersionOffset;
+				offset = nextVersionOffset - 1;
 			}
 
 			return offset;
@@ -260,6 +260,7 @@ namespace Changey.Services
 
 		private void WriteVersion(StringBuilder sb, Version version)
 		{
+			sb.Append("## ");
 			sb.Append(version.ReleaseDate.HasValue
 				? $"[{version.Name}] - {version.ReleaseDate:yyyy-MM-dd}"
 				: "[Unreleased]");
@@ -287,6 +288,6 @@ namespace Changey.Services
 		private const string SecuritySection = "Security";
 
 		private static readonly Regex VersionPattern =
-			new Regex("\\[([\\w\\d.])+\\](?: - (\\d{4}-\\d{2}-\\d{2})( \\[YANKED\\])?)?", RegexOptions.Compiled);
+			new Regex("\\[([\\w\\.]+)\\](?: - (\\d{4}-\\d{2}-\\d{2})( \\[YANKED\\])?)?", RegexOptions.Compiled);
 	}
 }

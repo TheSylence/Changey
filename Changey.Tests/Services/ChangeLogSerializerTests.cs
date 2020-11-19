@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Changey.Models;
 using Changey.Services;
 using NSubstitute;
 using Xunit;
+using FileAccess = Changey.Services.FileAccess;
 using Version = Changey.Models.Version;
 
 namespace Changey.Tests.Services
@@ -414,6 +416,28 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
+		public async Task DeserializeShouldReadVersionName()
+		{
+			// Arrange
+			var sb = GenerateChangeLogHeader();
+			sb.AppendLine("## [1.2] - 2020-05-12");
+
+			var fileAccess = Substitute.For<IFileAccess>();
+			const string fileName = "path";
+			fileAccess.ReadFromFile(fileName).Returns(Task.FromResult(sb.ToString()));
+
+			var sut = new ChangeLogSerializer(fileAccess);
+
+			// Act
+			var actual = await sut.Deserialize(fileName);
+
+			// Assert
+			var version = actual.Versions.FirstOrDefault();
+			Assert.NotNull(version);
+			Assert.Equal("1.2", version!.Name);
+		}
+
+		[Fact]
 		public async Task DeserializeShouldReadYankedVersion()
 		{
 			// Arrange
@@ -433,6 +457,60 @@ namespace Changey.Tests.Services
 			var version = actual.Versions.FirstOrDefault();
 			Assert.NotNull(version);
 			Assert.True(version!.Yanked);
+		}
+
+		[Fact]
+		public async Task SerializedChangeLogShouldBeDeserializable()
+		{
+			// Arrange
+			var expected = new ChangeLog
+			{
+				UsesSemVer = true,
+				Versions = new List<Version>
+				{
+					new Version
+					{
+						Added = new List<Change>
+						{
+							new Change {Text = "add"}
+						}
+					},
+					new Version
+					{
+						ReleaseDate = new DateTime(2019, 1, 1),
+						Name = "1.2",
+						Changed = new List<Change>
+						{
+							new Change {Text = "change"}
+						}
+					}
+				}
+			};
+
+			const string fileName = "file.name";
+			var sut = new ChangeLogSerializer(new FileAccess());
+
+			// Act
+			var serialized = sut.Serialize(expected);
+			await File.WriteAllTextAsync(fileName, serialized);
+			var actual = await sut.Deserialize(fileName);
+
+			// Assert
+			Assert.NotEmpty(serialized);
+			Assert.NotNull(actual);
+
+			Assert.Equal(expected.UsesSemVer, actual.UsesSemVer);
+
+			Assert.Equal(expected.Versions.Count, actual.Versions.Count);
+			Assert.Contains(actual.Versions, v => v.ReleaseDate == null);
+			Assert.Contains(actual.Versions, v => v.ReleaseDate != null);
+			Assert.Contains(actual.Versions, v => v.Name == "1.2");
+
+			var unreleasedVersion = actual.Versions.Single(v => v.ReleaseDate == null);
+			Assert.Collection(unreleasedVersion.Added, x => Assert.Equal("add", x.Text));
+
+			var releasedVersion = actual.Versions.Single(v => v.ReleaseDate != null);
+			Assert.Collection(releasedVersion.Changed, x => Assert.Equal("change", x.Text));
 		}
 
 		[Fact]

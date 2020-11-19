@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Changey.Models;
+using Version = Changey.Models.Version;
 
 namespace Changey.Services
 {
@@ -18,7 +20,11 @@ namespace Changey.Services
 		{
 			var changelog = new ChangeLog
 			{
-				UsesSemVer = usesSemver
+				UsesSemVer = usesSemver,
+				Versions = new List<Version>
+				{
+					new Version()
+				}
 			};
 
 			var content = _changeLogSerializer.Serialize(changelog);
