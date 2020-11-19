@@ -1,13 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
+using Changey.Models;
 
-namespace Changey.Models
+namespace Changey.Services
 {
-	internal interface IChangeLogCreator
-	{
-		Task CreateChangelog(string path, bool usesSemver);
-	}
-
 	internal class ChangeLogCreator
 		: IChangeLogCreator
 	{
@@ -30,7 +27,7 @@ namespace Changey.Models
 			{
 				await File.WriteAllTextAsync(path, content);
 			}
-			catch (IOException ex)
+			catch (Exception ex)
 			{
 				_logger.Error("Failed to create file", ex);
 			}

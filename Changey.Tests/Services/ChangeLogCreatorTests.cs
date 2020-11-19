@@ -1,10 +1,11 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Changey.Models;
+using Changey.Services;
 using NSubstitute;
 using Xunit;
 
-namespace Changey.Tests.Models
+namespace Changey.Tests.Services
 {
 	public class ChangeLogCreatorTests
 	{

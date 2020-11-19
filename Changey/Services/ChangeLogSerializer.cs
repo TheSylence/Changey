@@ -1,38 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Changey.Models;
+using Version = Changey.Models.Version;
 
-namespace Changey.Models
+namespace Changey.Services
 {
 	internal class ChangeLogSerializer : IChangeLogSerializer
 	{
+		public ChangeLogSerializer(IFileAccess fileAccess)
+		{
+			_fileAccess = fileAccess;
+		}
+
 		public async Task<ChangeLog> Deserialize(string path)
 		{
-			var content = await File.ReadAllTextAsync(path);
-			return DeserializeFromContent(content);
-		}
+			var content = await _fileAccess.ReadFromFile(path);
 
-		public string Serialize(ChangeLog changeLog)
-		{
-			var sb = new StringBuilder();
-
-			WriteHeader(changeLog, sb);
-
-			foreach (var version in changeLog.Versions)
-			{
-				WriteVersion(sb, version);
-			}
-
-			return sb.ToString();
-		}
-
-		internal ChangeLog DeserializeFromContent(string content)
-		{
 			var changeLog = new ChangeLog();
 
 			var lines = content.Split(Environment.NewLine);
@@ -47,6 +35,20 @@ namespace Changey.Models
 			ParseVersions(lines, offset, changeLog);
 
 			return changeLog;
+		}
+
+		public string Serialize(ChangeLog changeLog)
+		{
+			var sb = new StringBuilder();
+
+			WriteHeader(changeLog, sb);
+
+			foreach (var version in changeLog.Versions)
+			{
+				WriteVersion(sb, version);
+			}
+
+			return sb.ToString();
 		}
 
 		private void AddChange(Version version, string sectionName, string changeText)
@@ -210,11 +212,26 @@ namespace Changey.Models
 			}
 		}
 
-		private void WriteChanges(StringBuilder sb, string title, IList<Change> changes)
+		private string TitleForSection(Section section)
+		{
+			return section switch
+			{
+				Section.Added => AddedSection,
+				Section.Changed => ChangedSection,
+				Section.Deprecated => DeprecatedSection,
+				Section.Fixed => FixedSection,
+				Section.Removed => RemovedSection,
+				Section.Security => SecuritySection,
+				_ => string.Empty
+			};
+		}
+
+		private void WriteChanges(StringBuilder sb, Section section, IList<Change> changes)
 		{
 			if (!changes.Any())
 				return;
 
+			var title = TitleForSection(section);
 			sb.AppendLine($"### {title}");
 			foreach (var change in changes)
 			{
@@ -252,13 +269,15 @@ namespace Changey.Models
 
 			sb.AppendLine();
 
-			WriteChanges(sb, AddedSection, version.Added);
-			WriteChanges(sb, ChangedSection, version.Changed);
-			WriteChanges(sb, DeprecatedSection, version.Deprecated);
-			WriteChanges(sb, RemovedSection, version.Removed);
-			WriteChanges(sb, FixedSection, version.Fixed);
-			WriteChanges(sb, SecuritySection, version.Security);
+			WriteChanges(sb, Section.Added, version.Added);
+			WriteChanges(sb, Section.Changed, version.Changed);
+			WriteChanges(sb, Section.Deprecated, version.Deprecated);
+			WriteChanges(sb, Section.Removed, version.Removed);
+			WriteChanges(sb, Section.Fixed, version.Fixed);
+			WriteChanges(sb, Section.Security, version.Security);
 		}
+
+		private readonly IFileAccess _fileAccess;
 
 		private const string AddedSection = "Added";
 		private const string ChangedSection = "Changed";

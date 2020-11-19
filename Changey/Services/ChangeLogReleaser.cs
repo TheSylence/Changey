@@ -4,13 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Changey.Models
+namespace Changey.Services
 {
-	internal interface IChangeLogReleaser
-	{
-		Task<bool> Release(string path, string? date, string version);
-	}
-
 	internal class ChangeLogReleaser : IChangeLogReleaser
 	{
 		public ChangeLogReleaser(ILogger logger, IChangeLogSerializer changeLogSerializer)

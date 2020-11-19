@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using Changey.Models;
+using Changey.Services;
 using CommandLine;
 
 namespace Changey.Commands
@@ -20,7 +20,8 @@ namespace Changey.Commands
 		{
 			SemVer = semVer;
 
-			_changeLogCreator = changeLogCreator ?? new ChangeLogCreator(Logger, new ChangeLogSerializer());
+			_changeLogCreator =
+				changeLogCreator ?? new ChangeLogCreator(Logger, new ChangeLogSerializer(new FileAccess()));
 		}
 
 		[Option(HelpText = "Indicates the project uses semver", Default = true)]

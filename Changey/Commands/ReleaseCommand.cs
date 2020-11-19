@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using Changey.Models;
+using Changey.Services;
 using CommandLine;
 
 namespace Changey.Commands
@@ -22,7 +22,8 @@ namespace Changey.Commands
 			Version = version;
 			Date = date;
 
-			_changeLogReleaser = changeLogReleaser ?? new ChangeLogReleaser(Logger, new ChangeLogSerializer());
+			_changeLogReleaser =
+				changeLogReleaser ?? new ChangeLogReleaser(Logger, new ChangeLogSerializer(new FileAccess()));
 		}
 
 		[Option('d', HelpText = "The date to use for this release. If omitted the current date will be used",

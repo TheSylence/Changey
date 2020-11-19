@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Changey.Commands;
-using Changey.Models;
+using Changey.Services;
 using NSubstitute;
 using Xunit;
 

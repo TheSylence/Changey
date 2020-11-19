@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Changey.Models;
 
-namespace Changey.Models
+namespace Changey.Services
 {
 	internal interface IChangeLogSerializer
 	{

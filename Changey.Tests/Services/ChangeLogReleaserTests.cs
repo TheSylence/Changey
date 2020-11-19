@@ -3,11 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Changey.Models;
+using Changey.Services;
 using NSubstitute;
 using Xunit;
 using Version = Changey.Models.Version;
 
-namespace Changey.Tests.Models
+namespace Changey.Tests.Services
 {
 	public class ChangeLogReleaserTests
 	{
@@ -61,7 +62,7 @@ namespace Changey.Tests.Models
 			Assert.True(actual);
 
 			changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
-				x.Versions.First().ReleaseDate.Value.Date == new DateTime(2020, 12, 2)));
+				x.Versions.First().ReleaseDate!.Value.Date == new DateTime(2020, 12, 2)));
 
 			File.Delete(fileName);
 		}
@@ -92,7 +93,7 @@ namespace Changey.Tests.Models
 
 
 			changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
-				x.Versions.First().ReleaseDate.Value.Date == DateTime.Now.Date && x.Versions.First().Name == "1.2.3"));
+				x.Versions.First().ReleaseDate!.Value.Date == DateTime.Now.Date && x.Versions.First().Name == "1.2.3"));
 
 			File.Delete(fileName);
 		}
