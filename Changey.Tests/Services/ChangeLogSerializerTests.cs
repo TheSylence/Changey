@@ -491,12 +491,10 @@ namespace Changey.Tests.Services
 			var sut = new ChangeLogSerializer(new FileAccess());
 
 			// Act
-			var serialized = sut.Serialize(expected);
-			await File.WriteAllTextAsync(fileName, serialized);
+			await sut.Serialize(expected, fileName);
 			var actual = await sut.Deserialize(fileName);
 
 			// Assert
-			Assert.NotEmpty(serialized);
 			Assert.NotNull(actual);
 
 			Assert.Equal(expected.UsesSemVer, actual.UsesSemVer);
@@ -514,7 +512,7 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
-		public void SerializeShouldContainEntireChanges()
+		public async Task SerializeShouldContainEntireChanges()
 		{
 			// Arrange
 			var changeLog = new ChangeLog
@@ -565,12 +563,15 @@ namespace Changey.Tests.Services
 				}
 			};
 
-			var sut = new ChangeLogSerializer(Substitute.For<IFileAccess>());
+			var fileName = Path.GetTempFileName();
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
 
 			// Act
-			var actual = sut.Serialize(changeLog);
+			await sut.Serialize(changeLog, fileName);
 
 			// Assert
+			var actual = fileAccess.ContentWritten;
 			Assert.Contains("### Added", actual);
 			Assert.Contains("### Changed", actual);
 			Assert.Contains("### Deprecated", actual);
@@ -604,7 +605,7 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
-		public void SerializeShouldContainReleasedDateAndVersionName()
+		public async Task SerializeShouldContainReleasedDateAndVersionName()
 		{
 			// Arrange
 			var changeLog = new ChangeLog
@@ -619,18 +620,20 @@ namespace Changey.Tests.Services
 				}
 			};
 
-			var sut = new ChangeLogSerializer(Substitute.For<IFileAccess>());
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
 
 			// Act
-			var actual = sut.Serialize(changeLog);
+			await sut.Serialize(changeLog, "");
 
 			// Assert
+			var actual = fileAccess.ContentWritten;
 			Assert.Contains("[1.2.3]", actual);
 			Assert.Contains("2019-04-26", actual);
 		}
 
 		[Fact]
-		public void SerializeShouldContainUnreleasedVersion()
+		public async Task SerializeShouldContainUnreleasedVersion()
 		{
 			// Arrange
 			var changeLog = new ChangeLog
@@ -644,17 +647,19 @@ namespace Changey.Tests.Services
 				}
 			};
 
-			var sut = new ChangeLogSerializer(Substitute.For<IFileAccess>());
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
 
 			// Act
-			var actual = sut.Serialize(changeLog);
+			await sut.Serialize(changeLog, "");
 
 			// Assert
+			var actual = fileAccess.ContentWritten;
 			Assert.Contains("[Unreleased]", actual);
 		}
 
 		[Fact]
-		public void SerializeShouldCreateChangeLogWithCorrectName()
+		public async Task SerializeShouldCreateChangeLogWithCorrectName()
 		{
 			// Arrange
 			var changeLog = new ChangeLog
@@ -662,19 +667,21 @@ namespace Changey.Tests.Services
 				UsesSemVer = true
 			};
 
-			var sut = new ChangeLogSerializer(Substitute.For<IFileAccess>());
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
 
 			// Act
-			var actual = sut.Serialize(changeLog);
+			await sut.Serialize(changeLog, "");
 
 			// Assert
+			var actual = fileAccess.ContentWritten;
 			Assert.NotEmpty(actual);
 			Assert.Contains("keepachangelog.com", actual);
 			Assert.Contains("semver.org", actual);
 		}
 
 		[Fact]
-		public void SerializeShouldIndicateYankedReleases()
+		public async Task SerializeShouldIndicateYankedReleases()
 		{
 			// Arrange
 			var changeLog = new ChangeLog
@@ -690,17 +697,19 @@ namespace Changey.Tests.Services
 				}
 			};
 
-			var sut = new ChangeLogSerializer(Substitute.For<IFileAccess>());
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
 
 			// Act
-			var actual = sut.Serialize(changeLog);
+			await sut.Serialize(changeLog, "");
 
 			// Assert
+			var actual = fileAccess.ContentWritten;
 			Assert.Contains("[YANKED]", actual);
 		}
 
 		[Fact]
-		public void SerializeShouldNotWriteSemVerInfoWhenDisabled()
+		public async Task SerializeShouldNotWriteSemVerInfoWhenDisabled()
 		{
 			// Arrange
 			var changeLog = new ChangeLog
@@ -708,14 +717,30 @@ namespace Changey.Tests.Services
 				UsesSemVer = false
 			};
 
-			var sut = new ChangeLogSerializer(Substitute.For<IFileAccess>());
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
 
 			// Act
-			var actual = sut.Serialize(changeLog);
+			await sut.Serialize(changeLog, "");
 
 			// Assert
+			var actual = fileAccess.ContentWritten;
 			Assert.NotEmpty(actual);
 			Assert.DoesNotContain("semver.org", actual);
+		}
+	}
+
+	internal class MockFileAccess : IFileAccess
+	{
+		public string ContentRead { get; set; } = string.Empty;
+		public string ContentWritten { get; private set; } = string.Empty;
+
+		public Task<string> ReadFromFile(string path) => Task.FromResult(ContentRead);
+
+		public Task WriteToFile(string path, string content)
+		{
+			ContentWritten = content;
+			return Task.CompletedTask;
 		}
 	}
 }

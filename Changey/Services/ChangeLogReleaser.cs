@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,9 +35,16 @@ namespace Changey.Services
 			unreleased.ReleaseDate = releaseDate;
 			unreleased.Name = version;
 
-			var content = _changeLogSerializer.Serialize(changeLog);
+			try
+			{
+				await _changeLogSerializer.Serialize(changeLog, path);
+			}
+			catch (Exception ex)
+			{
+				_logger.Error("Failed to yank version", ex);
+				return false;
+			}
 
-			await File.WriteAllTextAsync(path, content);
 			return true;
 		}
 

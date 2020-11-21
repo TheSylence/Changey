@@ -5,7 +5,7 @@ namespace Changey.Services
 {
 	internal interface IChangeLogSerializer
 	{
-		string Serialize(ChangeLog changeLog);
+		Task Serialize(ChangeLog changeLog, string path);
 		Task<ChangeLog> Deserialize(string path);
 	}
 }

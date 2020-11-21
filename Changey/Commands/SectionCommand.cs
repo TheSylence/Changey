@@ -21,7 +21,7 @@ namespace Changey.Commands
 			Message = message;
 
 			_sectionAdder = sectionAdder ??
-			                new SectionAdder(new FileAccess(), new ChangeLogSerializer(new FileAccess()), Logger);
+			                new SectionAdder(new ChangeLogSerializer(new FileAccess()), Logger);
 		}
 
 		[Option('m', HelpText = "The message that should be added to the section", Required = true)]

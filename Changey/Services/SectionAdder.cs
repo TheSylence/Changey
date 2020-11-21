@@ -7,9 +7,8 @@ namespace Changey.Services
 {
 	internal class SectionAdder : ISectionAdder
 	{
-		public SectionAdder(IFileAccess fileAccess, IChangeLogSerializer changeLogSerializer, ILogger logger)
+		public SectionAdder(IChangeLogSerializer changeLogSerializer, ILogger logger)
 		{
-			_fileAccess = fileAccess;
 			_changeLogSerializer = changeLogSerializer;
 			_logger = logger;
 		}
@@ -26,11 +25,9 @@ namespace Changey.Services
 				return;
 			}
 
-			var serialized = _changeLogSerializer.Serialize(changeLog);
-
 			try
 			{
-				await _fileAccess.WriteToFile(path, serialized);
+				await _changeLogSerializer.Serialize(changeLog, path);
 			}
 			catch (Exception ex)
 			{
@@ -68,7 +65,6 @@ namespace Changey.Services
 			return true;
 		}
 
-		private readonly IFileAccess _fileAccess;
 		private readonly IChangeLogSerializer _changeLogSerializer;
 		private readonly ILogger _logger;
 	}

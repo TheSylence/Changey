@@ -48,9 +48,8 @@ namespace Changey.Tests.Services
 				}
 			}));
 
-			var fileAccess = Substitute.For<IFileAccess>();
 			var logger = Substitute.For<ILogger>();
-			var sut = new SectionAdder(fileAccess, serializer, logger);
+			var sut = new SectionAdder(serializer, logger);
 
 			var section = SectionFromName(sectionName);
 
@@ -59,9 +58,9 @@ namespace Changey.Tests.Services
 
 			// Assert
 			await serializer.Received(1).Deserialize(fileName);
-			serializer.Received(1)
+			await serializer.Received(1)
 				.Serialize(Arg.Is<ChangeLog>(cl =>
-					SectionList(cl.Versions.First(), section).Any(a => a.Text == message)));
+					SectionList(cl.Versions.First(), section).Any(a => a.Text == message)), fileName);
 		}
 
 		[Fact]
@@ -78,9 +77,8 @@ namespace Changey.Tests.Services
 				}
 			}));
 
-			var fileAccess = Substitute.For<IFileAccess>();
 			var logger = Substitute.For<ILogger>();
-			var sut = new SectionAdder(fileAccess, serializer, logger);
+			var sut = new SectionAdder(serializer, logger);
 
 			// Act
 			await sut.AddToSection(fileName, (Section) int.MaxValue, "test");
@@ -106,9 +104,8 @@ namespace Changey.Tests.Services
 				}
 			}));
 
-			var fileAccess = Substitute.For<IFileAccess>();
 			var logger = Substitute.For<ILogger>();
-			var sut = new SectionAdder(fileAccess, serializer, logger);
+			var sut = new SectionAdder(serializer, logger);
 
 			// Act
 			await sut.AddToSection(fileName, Section.Added, "test");
@@ -131,12 +128,11 @@ namespace Changey.Tests.Services
 				}
 			}));
 
-			var fileAccess = Substitute.For<IFileAccess>();
-			fileAccess.WriteToFile(Arg.Any<string>(), Arg.Any<string>())
+			serializer.Serialize(Arg.Any<ChangeLog>(), Arg.Any<string>())
 				.Returns(Task.FromException(new Exception("test-exception")));
 
 			var logger = Substitute.For<ILogger>();
-			var sut = new SectionAdder(fileAccess, serializer, logger);
+			var sut = new SectionAdder(serializer, logger);
 
 			// Act
 			var ex = await Record.ExceptionAsync(async () => await sut.AddToSection(fileName, Section.Added, "message"));

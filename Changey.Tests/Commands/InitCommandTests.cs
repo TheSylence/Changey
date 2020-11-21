@@ -27,7 +27,6 @@ namespace Changey.Tests.Commands
 		public async Task ExecuteShouldLogWhenCreatorThrows()
 		{
 			// Arrange
-
 			var changeLogCreator = Substitute.For<IChangeLogCreator>();
 			changeLogCreator.CreateChangelog(Arg.Any<string>(), Arg.Any<bool>())
 				.Returns(Task.FromException(new Exception("test-exception")));

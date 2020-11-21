@@ -37,6 +37,30 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
+		public async Task ReleaseShouldNotThrowWhenSerializerThrows()
+		{
+			// Arrange
+			var existingChangeLog = new ChangeLog();
+			existingChangeLog.Versions.Add(new Version
+			{
+				ReleaseDate = null
+			});
+
+			var logger = Substitute.For<ILogger>();
+			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+			changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(Task.FromResult(existingChangeLog));
+			changeLogSerializer.Serialize(Arg.Any<ChangeLog>(), Arg.Any<string>())
+				.Returns(Task.FromException(new Exception("test-exception")));
+			var sut = new ChangeLogReleaser(logger, changeLogSerializer);
+
+			// Act
+			var ex = await Record.ExceptionAsync(async () => await sut.Release("", null, "1"));
+
+			// Assert
+			Assert.Null(ex);
+		}
+
+		[Fact]
 		public async Task ReleaseShouldUpdateDateWhenGiven()
 		{
 			// Arrange
@@ -61,10 +85,8 @@ namespace Changey.Tests.Services
 			// Assert
 			Assert.True(actual);
 
-			changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
-				x.Versions.First().ReleaseDate!.Value.Date == new DateTime(2020, 12, 2)));
-
-			File.Delete(fileName);
+			await changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
+				x.Versions.First().ReleaseDate!.Value.Date == new DateTime(2020, 12, 2)), fileName);
 		}
 
 		[Fact]
@@ -92,10 +114,9 @@ namespace Changey.Tests.Services
 			Assert.True(actual);
 
 
-			changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
-				x.Versions.First().ReleaseDate!.Value.Date == DateTime.Now.Date && x.Versions.First().Name == "1.2.3"));
-
-			File.Delete(fileName);
+			await changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
+					x.Versions.First().ReleaseDate!.Value.Date == DateTime.Now.Date && x.Versions.First().Name == "1.2.3"),
+				fileName);
 		}
 	}
 }

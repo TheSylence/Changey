@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Changey.Models;
 using Version = Changey.Models.Version;
@@ -27,11 +26,9 @@ namespace Changey.Services
 				}
 			};
 
-			var content = _changeLogSerializer.Serialize(changelog);
-
 			try
 			{
-				await File.WriteAllTextAsync(path, content);
+				await _changeLogSerializer.Serialize(changelog, path);
 			}
 			catch (Exception ex)
 			{

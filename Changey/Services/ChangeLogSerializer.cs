@@ -37,18 +37,10 @@ namespace Changey.Services
 			return changeLog;
 		}
 
-		public string Serialize(ChangeLog changeLog)
+		public async Task Serialize(ChangeLog changeLog, string path)
 		{
-			var sb = new StringBuilder();
-
-			WriteHeader(changeLog, sb);
-
-			foreach (var version in changeLog.Versions)
-			{
-				WriteVersion(sb, version);
-			}
-
-			return sb.ToString();
+			var content = Serialize(changeLog);
+			await _fileAccess.WriteToFile(path, content);
 		}
 
 		private void AddChange(Version version, string sectionName, string changeText)
@@ -210,6 +202,20 @@ namespace Changey.Services
 
 				i = newOffset;
 			}
+		}
+
+		private string Serialize(ChangeLog changeLog)
+		{
+			var sb = new StringBuilder();
+
+			WriteHeader(changeLog, sb);
+
+			foreach (var version in changeLog.Versions)
+			{
+				WriteVersion(sb, version);
+			}
+
+			return sb.ToString();
 		}
 
 		private string TitleForSection(Section section)

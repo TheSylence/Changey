@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Changey.Models;
 using Changey.Services;
@@ -17,8 +18,8 @@ namespace Changey.Tests.Services
 
 			var logger = Substitute.For<ILogger>();
 			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-			const string changelogContent = "changelog-content";
-			changeLogSerializer.Serialize(Arg.Any<ChangeLog>()).Returns(changelogContent);
+			changeLogSerializer.Serialize(Arg.Any<ChangeLog>(), fileName)
+				.Returns(Task.FromException(new Exception("test-exception")));
 			var sut = new ChangeLogCreator(logger, changeLogSerializer);
 
 			// Act
@@ -29,26 +30,21 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
-		public async Task CreateChangeLogShouldWriteContentToFile()
+		public async Task CreateChangeLogShouldUseSerializer()
 		{
 			// Arrange
 			var fileName = Path.GetTempFileName();
 
 			var logger = Substitute.For<ILogger>();
 			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-			const string changelogContent = "changelog-content";
-			changeLogSerializer.Serialize(Arg.Any<ChangeLog>()).Returns(changelogContent);
+			changeLogSerializer.Serialize(Arg.Any<ChangeLog>(), fileName).Returns(Task.CompletedTask);
 			var sut = new ChangeLogCreator(logger, changeLogSerializer);
 
 			// Act
 			await sut.CreateChangelog(fileName, true);
 
 			// Assert
-			Assert.True(File.Exists(fileName));
-			var fileContent = await File.ReadAllTextAsync(fileName);
-			File.Delete(fileName);
-
-			Assert.Equal(changelogContent, fileContent);
+			await changeLogSerializer.Received(1).Serialize(Arg.Any<ChangeLog>(), fileName);
 		}
 	}
 }
