@@ -1,30 +1,23 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Changey.Options;
 using Changey.Services;
-using CommandLine;
 
 namespace Changey.Commands
 {
-	[Verb("yank", HelpText = "Yanks the latest released version in the changelog")]
-	internal class YankCommand : BaseCommand
+	internal class YankCommand : ICommand
 	{
-		[ExcludeFromCodeCoverage]
-		public YankCommand(bool verbose, bool silent, string path)
-			: this(verbose, silent, path, null)
+		public YankCommand(YankOption option, IVersionYanker versionYanker)
 		{
+			_option = option;
+			_versionYanker = versionYanker;
 		}
 
-		public YankCommand(bool verbose, bool silent, string path, IVersionYanker? versionYanker)
-			: base(verbose, silent, path)
+		public async Task Execute()
 		{
-			_versionYanker = versionYanker ?? new VersionYanker(Logger, new ChangeLogSerializer(new FileAccess()));
+			await _versionYanker.Yank(_option.Path);
 		}
 
-		public override async Task Execute()
-		{
-			await _versionYanker.Yank(Path);
-		}
-
+		private readonly YankOption _option;
 		private readonly IVersionYanker _versionYanker;
 	}
 }

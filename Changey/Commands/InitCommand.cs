@@ -1,46 +1,33 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Changey.Options;
 using Changey.Services;
-using CommandLine;
 
 namespace Changey.Commands
 {
-	[Verb("init", HelpText = "Create a new changelog")]
-	internal class InitCommand : BaseCommand
+	internal class InitCommand : ICommand
 	{
-		[ExcludeFromCodeCoverage]
-		public InitCommand(bool semVer, string path, bool silent, bool verbose)
-			: this(semVer, path, silent, verbose, null)
+		public InitCommand(InitOption option, IChangeLogCreator changeLogCreator)
 		{
+			_option = option;
+			_changeLogCreator = changeLogCreator;
 		}
 
-		public InitCommand(bool semVer, string path, bool silent, bool verbose, IChangeLogCreator? changeLogCreator)
-			: base(verbose, silent, path)
-		{
-			SemVer = semVer;
-
-			_changeLogCreator =
-				changeLogCreator ?? new ChangeLogCreator(Logger, new ChangeLogSerializer(new FileAccess()));
-		}
-
-		[Option(HelpText = "Indicates the project uses semver", Default = true)]
-		public bool SemVer { get; }
-
-		public override async Task Execute()
+		public async Task Execute()
 		{
 			try
 			{
-				Logger.Verbose($"Creating changelog at {Path}");
-				await _changeLogCreator.CreateChangelog(Path, SemVer);
-				Logger.Verbose($"Created changelog at {Path}");
+				_option.Logger.Verbose($"Creating changelog at {_option.Path}");
+				await _changeLogCreator.CreateChangelog(_option.Path, _option.SemVer);
+				_option.Logger.Verbose($"Created changelog at {_option.Path}");
 			}
 			catch (Exception ex)
 			{
-				Logger.Error("Failed to create changelog", ex);
+				_option.Logger.Error("Failed to create changelog", ex);
 			}
 		}
 
+		private readonly InitOption _option;
 		private readonly IChangeLogCreator _changeLogCreator;
 	}
 }

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 using CommandLine;
 
-namespace Changey.Commands
+namespace Changey.Options
 {
-	internal abstract class BaseCommand
+	internal abstract class BaseOption
 	{
-		protected BaseCommand(bool verbose, bool silent, string path)
+		protected BaseOption(string path, bool silent, bool verbose)
 		{
 			Verbose = verbose;
 			Silent = silent;
@@ -14,6 +13,8 @@ namespace Changey.Commands
 
 			Logger = new Logger(Console.Out, Silent, Verbose);
 		}
+
+		public ILogger Logger { get; private set; }
 
 		[Option('p', HelpText = "Path to the changelog file that will be created", Default = "changelog.md")]
 		public string Path { get; }
@@ -23,10 +24,6 @@ namespace Changey.Commands
 
 		[Option('v', Default = false, HelpText = "Enable verbose log output")]
 		public bool Verbose { get; }
-
-		protected ILogger Logger { get; private set; }
-
-		public abstract Task Execute();
 
 		internal void InjectLogger(ILogger logger)
 		{

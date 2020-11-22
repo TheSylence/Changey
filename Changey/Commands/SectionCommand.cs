@@ -1,39 +1,25 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
-using Changey.Models;
+﻿using System.Threading.Tasks;
+using Changey.Options;
 using Changey.Services;
-using CommandLine;
 
 namespace Changey.Commands
 {
-	internal abstract class SectionCommand : BaseCommand
+	internal class SectionCommand : ICommand
 	{
-		[ExcludeFromCodeCoverage]
-		protected SectionCommand(string message, bool verbose, bool silent, string path)
-			: this(message, verbose, silent, path, null)
+		public SectionCommand(SectionOption option, ISectionAdder sectionAdder)
 		{
+			_option = option;
+
+
+			_sectionAdder = sectionAdder;
 		}
 
-		protected SectionCommand(string message, bool verbose, bool silent, string path,
-			ISectionAdder? sectionAdder)
-			: base(verbose, silent, path)
+		public async Task Execute()
 		{
-			Message = message;
-
-			_sectionAdder = sectionAdder ??
-			                new SectionAdder(new ChangeLogSerializer(new FileAccess()), Logger);
+			await _sectionAdder.AddToSection(_option.Path, _option.Section, _option.Message);
 		}
 
-		[Option('m', HelpText = "The message that should be added to the section", Required = true)]
-		public string Message { get; }
-
-		protected abstract Section Section { get; }
-
-		public override async Task Execute()
-		{
-			await _sectionAdder.AddToSection(Path, Section, Message);
-		}
-
+		private readonly SectionOption _option;
 		private readonly ISectionAdder _sectionAdder;
 	}
 }

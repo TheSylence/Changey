@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Changey.Commands;
+using Changey.Options;
 using CommandLine;
 
 [assembly: InternalsVisibleTo("Changey.Tests")]
@@ -11,20 +11,34 @@ using CommandLine;
 namespace Changey
 {
 	[ExcludeFromCodeCoverage]
-	internal static class Program
+	internal class Program
 	{
+		private Program()
+		{
+			_loader = new TypeLoader();
+		}
+
 		private static async Task Main(string[] args)
 		{
-			var loader = new CommandLoader();
-			var commandTypes = loader.LoadCommandTypes().ToArray();
+			await new Program().Run(args);
+		}
+
+		private async Task Run(string[] args)
+		{
+			var commandTypes = _loader.LoadOptionTypes().ToArray();
 
 			await Parser.Default.ParseArguments(args, commandTypes).WithParsedAsync(Run);
 		}
 
-		private static async Task Run(object arg)
+		private async Task Run(object arg)
 		{
-			if (arg is BaseCommand command)
-				await command.Execute();
+			if (arg is BaseOption option)
+			{
+				var processor = _loader.FindCommand(option);
+				await processor.Execute();
+			}
 		}
+
+		private readonly TypeLoader _loader;
 	}
 }

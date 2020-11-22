@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Changey.Commands;
+using Changey.Options;
 using Changey.Services;
 using NSubstitute;
 using Xunit;
@@ -13,7 +14,8 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var versionYanker = Substitute.For<IVersionYanker>();
-			var sut = new YankCommand(false, false, "path", versionYanker);
+			var option = new YankOption(false, false, "path");
+			var sut = new YankCommand(option, versionYanker);
 
 			// Act
 			await sut.Execute();

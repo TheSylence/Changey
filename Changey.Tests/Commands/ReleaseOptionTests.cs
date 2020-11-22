@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Changey.Commands;
+using Changey.Options;
 using Changey.Services;
 using NSubstitute;
 using Xunit;
@@ -16,7 +17,8 @@ namespace Changey.Tests.Commands
 			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
 			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(Task.FromResult(true));
-			var sut = new ReleaseCommand(null, "1.2.3", "file.name", false, false, changeLogReleaser);
+			var option = new ReleaseOption(null, "1.2.3", "file.name", false, false);
+			var sut = new ReleaseCommand(option, changeLogReleaser);
 
 			// Act
 			await sut.Execute();
@@ -33,10 +35,12 @@ namespace Changey.Tests.Commands
 			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(Task.FromResult(false));
 
-			var sut = new ReleaseCommand(null, "1.2.3", "file.name", false, false, changeLogReleaser);
+			var option = new ReleaseOption(null, "1.2.3", "file.name", false, false);
 
 			var logger = Substitute.For<ILogger>();
-			sut.InjectLogger(logger);
+			option.InjectLogger(logger);
+
+			var sut = new ReleaseCommand(option, changeLogReleaser);
 
 			// Act
 			await sut.Execute();
@@ -53,10 +57,13 @@ namespace Changey.Tests.Commands
 			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(Task.FromException<bool>(new Exception("test-exception")));
 
-			var sut = new ReleaseCommand(null, "1.2.3", "file.name", false, false, changeLogReleaser);
+			var option = new ReleaseOption(null, "1.2.3", "file.name", false, false);
 
 			var logger = Substitute.For<ILogger>();
-			sut.InjectLogger(logger);
+			option.InjectLogger(logger);
+
+			var sut = new ReleaseCommand(option, changeLogReleaser);
+
 
 			// Act
 			await sut.Execute();

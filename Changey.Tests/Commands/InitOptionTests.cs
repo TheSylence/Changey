@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Changey.Commands;
+using Changey.Options;
 using Changey.Services;
 using NSubstitute;
 using Xunit;
@@ -14,7 +15,9 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var changeLogCreator = Substitute.For<IChangeLogCreator>();
-			var sut = new InitCommand(true, "file.name", false, false, changeLogCreator);
+			var option = new InitOption(true, "file.name", false, false);
+			option.InjectLogger(Substitute.For<ILogger>());
+			var sut = new InitCommand(option, changeLogCreator);
 
 			// Act
 			await sut.Execute();
@@ -31,10 +34,12 @@ namespace Changey.Tests.Commands
 			changeLogCreator.CreateChangelog(Arg.Any<string>(), Arg.Any<bool>())
 				.Returns(Task.FromException(new Exception("test-exception")));
 
-			var sut = new InitCommand(true, "file.name", false, false, changeLogCreator);
+			var option = new InitOption(true, "file.name", false, false);
 
 			var logger = Substitute.For<ILogger>();
-			sut.InjectLogger(logger);
+			option.InjectLogger(logger);
+
+			var sut = new InitCommand(option, changeLogCreator);
 
 			// Act
 			await sut.Execute();
