@@ -17,12 +17,12 @@ namespace Changey.Tests
 
 		public static TheoryData<object> SectionOptions => new TheoryData<object>
 		{
-			new AddOption("test", false, false, string.Empty),
-			new ChangeOption("test", false, false, string.Empty),
-			new RemoveOption("test", false, false, string.Empty),
-			new FixOption("test", false, false, string.Empty),
-			new SecurityOption("test", false, false, string.Empty),
-			new DeprecatedOption("test", false, false, string.Empty)
+			new AddOption("test", string.Empty, false, false),
+			new ChangeOption("test", string.Empty, false, false),
+			new RemoveOption("test", string.Empty, false, false),
+			new FixOption("test", string.Empty, false, false),
+			new SecurityOption("test", string.Empty, false, false),
+			new DeprecatedOption("test", string.Empty, false, false)
 		};
 
 		[Fact]
@@ -58,7 +58,7 @@ namespace Changey.Tests
 		public void FindCommandShouldFindForYankOption()
 		{
 			// Arrange
-			var option = new YankOption(false, false, string.Empty);
+			var option = new YankOption(string.Empty, false, false);
 			var sut = new TypeLoader();
 
 			// Act

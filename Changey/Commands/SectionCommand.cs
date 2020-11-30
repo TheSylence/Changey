@@ -9,8 +9,6 @@ namespace Changey.Commands
 		public SectionCommand(SectionOption option, ISectionAdder sectionAdder)
 		{
 			_option = option;
-
-
 			_sectionAdder = sectionAdder;
 		}
 

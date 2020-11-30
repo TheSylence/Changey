@@ -7,6 +7,7 @@ using Changey.Services;
 namespace Changey
 {
 	internal class TypeLoader
+		: ITypeLoader
 	{
 		public TypeLoader()
 		{

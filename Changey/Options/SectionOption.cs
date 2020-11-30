@@ -5,7 +5,7 @@ namespace Changey.Options
 {
 	internal abstract class SectionOption : BaseOption
 	{
-		protected SectionOption(string message, bool verbose, bool silent, string path)
+		protected SectionOption(string message, string path, bool silent, bool verbose)
 			: base(path, silent, verbose)
 		{
 			Message = message;
@@ -14,6 +14,6 @@ namespace Changey.Options
 		[Option('m', HelpText = "The message that should be added to the section", Required = true)]
 		public string Message { get; }
 
-		public abstract Section Section { get; }
+		internal abstract Section Section { get; }
 	}
 }

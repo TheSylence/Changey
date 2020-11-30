@@ -114,6 +114,38 @@ namespace Changey.Tests.Services
 			logger.Received(1).Error(Arg.Is<string>(x => x.Contains("unreleased version")));
 		}
 
+		[Theory]
+		[InlineData("Added", "add-message")]
+		[InlineData("Removed", "remove-message")]
+		[InlineData("Changed", "change-message")]
+		[InlineData("Fixed", "fixed-message")]
+		[InlineData("Security", "security-message")]
+		[InlineData("Deprecated", "deprecated-message")]
+		public async Task AddToSectionShouldLog(string sectionName, string message)
+		{
+			// Arrange
+			var serializer = Substitute.For<IChangeLogSerializer>();
+			const string fileName = "path";
+			serializer.Deserialize(fileName).Returns(Task.FromResult(new ChangeLog
+			{
+				Versions = new List<Version>
+				{
+					new Version()
+				}
+			}));
+
+			var logger = Substitute.For<ILogger>();
+			var sut = new SectionAdder(serializer, logger);
+
+			var section = SectionFromName(sectionName);
+
+			// Act
+			await sut.AddToSection(fileName, section, message);
+
+			// Assert
+			logger.Received(1).Verbose(Arg.Any<string>());
+		}
+
 		[Fact]
 		public async Task AddToSectionShouldNotThrowWhenFileAccessThrows()
 		{

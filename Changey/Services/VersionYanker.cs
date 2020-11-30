@@ -5,11 +5,6 @@ using Changey.Models;
 
 namespace Changey.Services
 {
-	internal interface IVersionYanker
-	{
-		Task<bool> Yank(string path);
-	}
-
 	internal class VersionYanker : IVersionYanker
 	{
 		public VersionYanker(ILogger logger, IChangeLogSerializer changeLogSerializer)

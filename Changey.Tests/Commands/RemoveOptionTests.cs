@@ -17,7 +17,7 @@ namespace Changey.Tests.Commands
 			var sectionAdder = Substitute.For<ISectionAdder>();
 			const string fileName = "path";
 			const string message = "the-message";
-			var option = new RemoveOption(message, false, false, fileName);
+			var option = new RemoveOption(message, fileName, false, false);
 			var sut = new SectionCommand(option, sectionAdder);
 
 			// Act

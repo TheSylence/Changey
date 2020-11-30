@@ -10,24 +10,30 @@ using CommandLine;
 
 namespace Changey
 {
-	[ExcludeFromCodeCoverage]
 	internal class Program
 	{
+		[ExcludeFromCodeCoverage]
 		private Program()
+			: this(null)
 		{
-			_loader = new TypeLoader();
 		}
 
-		private static async Task Main(string[] args)
+		internal Program(ITypeLoader? typeLoader)
 		{
-			await new Program().Run(args);
+			_loader = typeLoader ?? new TypeLoader();
 		}
 
-		private async Task Run(string[] args)
+		internal async Task Run(string[] args)
 		{
 			var commandTypes = _loader.LoadOptionTypes().ToArray();
 
 			await Parser.Default.ParseArguments(args, commandTypes).WithParsedAsync(Run);
+		}
+
+		[ExcludeFromCodeCoverage]
+		private static async Task Main(string[] args)
+		{
+			await new Program().Run(args);
 		}
 
 		private async Task Run(object arg)
@@ -39,6 +45,6 @@ namespace Changey
 			}
 		}
 
-		private readonly TypeLoader _loader;
+		private readonly ITypeLoader _loader;
 	}
 }

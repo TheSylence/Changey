@@ -15,13 +15,13 @@ namespace Changey.Services
 
 		public async Task AddToSection(string path, Section section, string message)
 		{
-			_logger.Verbose($"Adding new {section} to {path}");
+			_logger.Verbose($"Adding new '{section}' to '{path}'");
 
 			var changeLog = await _changeLogSerializer.Deserialize(path);
 
 			if (!AddToSection(changeLog, section, message))
 			{
-				_logger.Verbose($"Could not add new {section} to {path}");
+				_logger.Verbose($"Could not add new '{section}' to '{path}'");
 				return;
 			}
 

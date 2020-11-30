@@ -14,7 +14,7 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var versionYanker = Substitute.For<IVersionYanker>();
-			var option = new YankOption(false, false, "path");
+			var option = new YankOption("path", false, false);
 			var sut = new YankCommand(option, versionYanker);
 
 			// Act

@@ -6,11 +6,11 @@ namespace Changey.Options
 	[Verb("deprecate", HelpText = "Adds a new change to the 'Deprecated' section of the current unreleased version")]
 	internal class DeprecatedOption : SectionOption
 	{
-		public DeprecatedOption(string message, bool verbose, bool silent, string path)
-			: base(message, verbose, silent, path)
+		public DeprecatedOption(string message, string path, bool silent, bool verbose)
+			: base(message, path, silent, verbose)
 		{
 		}
 
-		public override Section Section => Section.Deprecated;
+		internal override Section Section => Section.Deprecated;
 	}
 }

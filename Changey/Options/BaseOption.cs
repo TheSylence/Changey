@@ -14,7 +14,7 @@ namespace Changey.Options
 			Logger = new Logger(Console.Out, Silent, Verbose);
 		}
 
-		public ILogger Logger { get; private set; }
+		internal ILogger Logger { get; private set; }
 
 		[Option('p', HelpText = "Path to the changelog file that will be created", Default = "changelog.md")]
 		public string Path { get; }
