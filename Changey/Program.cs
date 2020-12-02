@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -14,20 +16,28 @@ namespace Changey
 	{
 		[ExcludeFromCodeCoverage]
 		private Program()
-			: this(null)
+			: this(null, null)
 		{
 		}
 
-		internal Program(ITypeLoader? typeLoader)
+		internal Program(ITypeLoader? typeLoader, TextWriter? helpWriter)
 		{
 			_loader = typeLoader ?? new TypeLoader();
+			_helpWriter = helpWriter ?? Console.Out;
 		}
 
 		internal async Task Run(string[] args)
 		{
 			var commandTypes = _loader.LoadOptionTypes().ToArray();
 
-			await Parser.Default.ParseArguments(args, commandTypes).WithParsedAsync(Run);
+			var parser = new Parser(configuration =>
+			{
+				configuration.HelpWriter = _helpWriter;
+				configuration.AutoHelp = true;
+				configuration.AutoVersion = true;
+			});
+
+			await parser.ParseArguments(args, commandTypes).WithParsedAsync(Run);
 		}
 
 		[ExcludeFromCodeCoverage]
@@ -46,5 +56,6 @@ namespace Changey
 		}
 
 		private readonly ITypeLoader _loader;
+		private readonly TextWriter _helpWriter;
 	}
 }
