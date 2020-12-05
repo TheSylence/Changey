@@ -17,9 +17,9 @@ namespace Changey.Commands
 		{
 			try
 			{
-				_option.Logger.Verbose($"Creating changelog at {_option.Path}");
-				await _changeLogCreator.CreateChangelog(_option.Path, _option.SemVer);
-				_option.Logger.Verbose($"Created changelog at {_option.Path}");
+				_option.Logger.Verbose($"Creating changelog at '{_option.Path}'");
+				await _changeLogCreator.CreateChangelog(_option.Path, _option.SemVer, _option.Overwrite);
+				_option.Logger.Verbose($"Created changelog at '{_option.Path}'");
 			}
 			catch (Exception ex)
 			{

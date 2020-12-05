@@ -29,7 +29,7 @@ namespace Changey.Tests
 		public void FindCommandShouldFindForInitOptions()
 		{
 			// Arrange
-			var option = new InitOption(true, string.Empty, false, false);
+			var option = new InitOption(true, true, string.Empty, false, false);
 			var sut = new TypeLoader();
 
 			// Act
