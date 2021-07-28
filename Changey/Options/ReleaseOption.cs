@@ -16,7 +16,7 @@ namespace Changey.Options
 			Default = null)]
 		public string? Date { get; }
 
-		[Option('n', HelpText = "Name of the version to release.", Required = true)]
+		[Value(0, HelpText = "Name of the version to release.", Required = true, MetaName = nameof(Name))]
 		public string Name { get; }
 	}
 }

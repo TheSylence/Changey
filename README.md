@@ -19,13 +19,13 @@ It will fail when the changelog already exists unless the `-o` option is set.
 
 ### Releasing a version
 
-`changey release -n 1.2.3` will add a 1.2.3 as a released version to the changelog.
+`changey release 1.2.3` will add a 1.2.3 as a released version to the changelog.
 
-`changey release -n 1.2.3 -d 2020-05-13` will add 1.2.3 as a relased version on May the 13th, 2020 to the changelog.
+`changey release 1.2.3 -d 2020-05-13` will add 1.2.3 as a relased version on May the 13th, 2020 to the changelog.
 
 ### Adding changes
 
-`changey add -m "Added a cool feature"` will add "Added a cool feature" under the "Add" section to the changelog.
+`changey add "Added a cool feature"` will add "Added a cool feature" under the "Add" section to the changelog.
 List of possible sections:
 * add
 * fix

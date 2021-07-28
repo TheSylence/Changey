@@ -13,6 +13,30 @@ namespace Changey.Tests
 		private string[] SplitArgs(string args) => args.Split(' ');
 
 		[Fact]
+		public async Task AddShouldTreatUnnamedOptionAsMessage()
+		{
+			// Arrange
+			const string path = nameof(AddShouldTreatUnnamedOptionAsMessage) + ".md"; 
+			await using var writer = new StringWriter();
+			var sut = new Program(null, writer);
+
+			var args = SplitArgs($"init -p {path} -o");
+			await sut.Run(args);
+			
+			args = SplitArgs($"add test123 -p {path}");
+
+			// Act
+			await sut.Run(args);
+
+			// Assert
+			var output = writer.ToString();
+			Assert.DoesNotContain("ERROR", output);
+
+			var content = await File.ReadAllTextAsync(path);
+			Assert.Contains( "test123", content);
+		}
+
+		[Fact]
 		public async Task EmptyArgumentsShouldProduceHelpScreen()
 		{
 			// Arrange
@@ -81,13 +105,13 @@ namespace Changey.Tests
 		}
 
 		[Theory]
-		[InlineData("release", "-n")]
-		[InlineData("add", "-m")]
-		[InlineData("security", "-m")]
-		[InlineData("deprecate", "-m")]
-		[InlineData("fix", "-m")]
-		[InlineData("change", "-m")]
-		[InlineData("remove", "-m")]
+		[InlineData("release", "version to release")]
+		[InlineData("add", "message that should be added")]
+		[InlineData("security", "message that should be added")]
+		[InlineData("deprecate", "message that should be added")]
+		[InlineData("fix", "message that should be added")]
+		[InlineData("change", "message that should be added")]
+		[InlineData("remove", "message that should be added")]
 		public async Task MissingArgsShouldProduceError(string verb, string missingArg)
 		{
 			// Arrange
@@ -108,14 +132,14 @@ namespace Changey.Tests
 
 		[Theory]
 		[InlineData("init", typeof(InitOption))]
-		[InlineData("release -n test", typeof(ReleaseOption))]
+		[InlineData("release test", typeof(ReleaseOption))]
 		[InlineData("yank", typeof(YankOption))]
-		[InlineData("add -m test", typeof(AddOption))]
-		[InlineData("security -m test", typeof(SecurityOption))]
-		[InlineData("deprecate -m test", typeof(DeprecatedOption))]
-		[InlineData("fix -m test", typeof(FixOption))]
-		[InlineData("change -m test", typeof(ChangeOption))]
-		[InlineData("remove -m test", typeof(RemoveOption))]
+		[InlineData("add test", typeof(AddOption))]
+		[InlineData("security test", typeof(SecurityOption))]
+		[InlineData("deprecate test", typeof(DeprecatedOption))]
+		[InlineData("fix test", typeof(FixOption))]
+		[InlineData("change test", typeof(ChangeOption))]
+		[InlineData("remove test", typeof(RemoveOption))]
 		public async Task VerbShouldUseCorrectCommand(string verb, Type optionType)
 		{
 			// Arrange

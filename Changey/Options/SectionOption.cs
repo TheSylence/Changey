@@ -11,7 +11,7 @@ namespace Changey.Options
 			Message = message;
 		}
 
-		[Option('m', HelpText = "The message that should be added to the section", Required = true)]
+		[Value(0, Required = true, HelpText = "The message that should be added to the section", MetaName = nameof(Message))]
 		public string Message { get; }
 
 		internal abstract Section Section { get; }
