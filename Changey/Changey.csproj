@@ -6,6 +6,17 @@
 		<nullable>enable</nullable>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+		<PackAsTool>true</PackAsTool>
+		<ToolCommandName>changey</ToolCommandName>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Manage your changelogs by adhering to the https://keepachangelog.com/en/1.1.0/ standard.</Description>
+		<Title>Changey</Title>
+		<PackageProjectUrl>https://github.com/TheSylence/Changey</PackageProjectUrl>
+		<Authors>TheSylence</Authors>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommandLineParser" Version="2.8.0" />
