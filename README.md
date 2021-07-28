@@ -1,5 +1,5 @@
 # Changey
-Manage your changelogs by adhering to the https://keepachangelog.com/en/1.0.0/ standard.
+Manage your changelogs by adhering to the https://keepachangelog.com/en/1.1.0/ standard.
 The generated changelogs are Markdown files that can be directly integrated into many webservices.
 
 ## Usage
