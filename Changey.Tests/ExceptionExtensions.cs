@@ -40,7 +40,7 @@ namespace Changey.Tests
 					}
 				}
 
-				return (exception, trace) => exception;
+				return (exception, _) => exception;
 			})();
 	}
 }

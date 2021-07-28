@@ -4,6 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>netcoreapp5.0</TargetFramework>
 		<nullable>enable</nullable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>
