@@ -1,6 +1,17 @@
 # Changey
+
+![Nuget](https://img.shields.io/nuget/v/Changey) 
+[![CI Build](https://github.com/TheSylence/Changey/actions/workflows/ci.yml/badge.svg)](https://github.com/TheSylence/Changey/actions/workflows/ci.yml)
+![GitHub](https://img.shields.io/github/license/TheSylence/changey)
+
 Manage your changelogs by adhering to the https://keepachangelog.com/en/1.1.0/ standard.
 The generated changelogs are Markdown files that can be directly integrated into many webservices.
+
+## Installation
+
+Changey is distributed as a .NET tool and can be installed using the [dotnet tool install](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install) command:
+
+`dotnet tool install --global Changey`
 
 ## Usage
 
