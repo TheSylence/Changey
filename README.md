@@ -4,14 +4,24 @@ The generated changelogs are Markdown files that can be directly integrated into
 
 ## Usage
 
+### Global options
+
+These options can be used with all commands:
+* `-p` specifies the path to the changelog that should be used. The default is to use the `changelog.md` file in the current directory.
+* `-s` disables all output to stdout and stderr.
+* `-v` enables verbose logging output to stdout
+
 ### Creating a new changelog
 
 `changey init` will initialize a new change log in the current directory.
-This is required before using any other commands
+This is required before using any other commands.
+It will fail when the changelog already exists unless the `-o` option is set.
 
 ### Releasing a version
 
 `changey release -n 1.2.3` will add a 1.2.3 as a released version to the changelog.
+
+`changey release -n 1.2.3 -d 2020-05-13` will add 1.2.3 as a relased version on May the 13th, 2020 to the changelog.
 
 ### Adding changes
 
@@ -27,6 +37,10 @@ List of possible sections:
 ### Yanking a release version
 
 `changey yank` will mark the last released version as yanked.
+
+### Help
+
+`changey help` and `changey help [command]` will output help texts and usages for every command available.
 
 ## Build from source
 
