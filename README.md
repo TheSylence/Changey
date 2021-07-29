@@ -13,6 +13,8 @@ Changey is distributed as a .NET tool and can be installed using the [dotnet too
 
 `dotnet tool install --global Changey`
 
+You can also download the the package from [Github releases](https://github.com/TheSylence/Changey/releases) or from [nuget](https://www.nuget.org/packages/Changey/). 
+
 ## Usage
 
 ### Global options
