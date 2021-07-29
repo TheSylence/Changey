@@ -16,13 +16,13 @@ namespace Changey.Tests
 		public async Task AddShouldTreatUnnamedOptionAsMessage()
 		{
 			// Arrange
-			const string path = nameof(AddShouldTreatUnnamedOptionAsMessage) + ".md"; 
+			const string path = nameof(AddShouldTreatUnnamedOptionAsMessage) + ".md";
 			await using var writer = new StringWriter();
 			var sut = new Program(null, writer);
 
 			var args = SplitArgs($"init -p {path} -o");
 			await sut.Run(args);
-			
+
 			args = SplitArgs($"add test123 -p {path}");
 
 			// Act
@@ -33,7 +33,7 @@ namespace Changey.Tests
 			Assert.DoesNotContain("ERROR", output);
 
 			var content = await File.ReadAllTextAsync(path);
-			Assert.Contains( "test123", content);
+			Assert.Contains("test123", content);
 		}
 
 		[Fact]
@@ -50,6 +50,29 @@ namespace Changey.Tests
 			var output = writer.ToString();
 			Assert.Contains("version", output);
 			Assert.Contains("help", output);
+		}
+
+		[Theory]
+		[InlineData("init")]
+		[InlineData("release")]
+		[InlineData("add")]
+		[InlineData("security")]
+		[InlineData("change")]
+		[InlineData("remove")]
+		[InlineData("fix")]
+		[InlineData("deprecate")]
+		public async Task HelpScreenShouldContainExamples(string command)
+		{
+			// Arrange
+			await using var writer = new StringWriter();
+			var sut = new Program(null, writer);
+
+			// Act
+			await sut.Run(new[] {"help", command});
+
+			// Assert
+			var output = writer.ToString();
+			Assert.Contains("USAGE", output);
 		}
 
 		[Fact]
@@ -101,7 +124,7 @@ namespace Changey.Tests
 
 			// Assert
 			var output = writer.ToString();
-			Assert.DoesNotContain($"  {verb}", output);
+			Assert.DoesNotContain($"  {verb} ", output);
 		}
 
 		[Theory]

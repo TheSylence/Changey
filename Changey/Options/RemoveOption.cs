@@ -1,5 +1,7 @@
-﻿using Changey.Models;
+﻿using System.Collections.Generic;
+using Changey.Models;
 using CommandLine;
+using CommandLine.Text;
 
 namespace Changey.Options
 {
@@ -10,6 +12,8 @@ namespace Changey.Options
 			: base(message, path, silent, verbose)
 		{
 		}
+
+		[Usage(ApplicationAlias = "changey")] public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<RemoveOption>();
 
 		internal override Section Section => Section.Removed;
 	}

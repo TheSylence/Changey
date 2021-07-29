@@ -1,5 +1,7 @@
-﻿using Changey.Models;
+﻿using System.Collections.Generic;
+using Changey.Models;
 using CommandLine;
+using CommandLine.Text;
 
 namespace Changey.Options
 {
@@ -11,6 +13,8 @@ namespace Changey.Options
 		{
 		}
 
+		[Usage(ApplicationAlias = "changey")] public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<SecurityOption>();
+		
 		internal override Section Section => Section.Security;
 	}
 }
