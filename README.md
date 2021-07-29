@@ -38,14 +38,18 @@ It will fail when the changelog already exists unless the `-o` option is set.
 
 ### Adding changes
 
-`changey add "Added a cool feature"` will add "Added a cool feature" under the "Add" section to the changelog.
-List of possible sections:
+`changey add "Added a cool feature"` will add "Added a cool feature" under the "Add" section to the changelog. (Make sure to suround your message with quotes if it contains spaces.)
+
+List of possible sections to add to:
 * add
 * fix
 * change
 * remove
 * deprecate
 * security
+
+Use them as a verb when invoking changey:
+`changey change` to add to the "Change" section, `changey deprecate` for the "Deprecate" section and so on.
 
 ### Yanking a release version
 
