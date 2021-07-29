@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Changey.Models;
+using Version = Changey.Models.Version;
 
 namespace Changey.Services
 {
@@ -40,8 +41,8 @@ namespace Changey.Services
 			var version = changeLog.Versions.FirstOrDefault(v => v.ReleaseDate == null);
 			if (version == null)
 			{
-				_logger.Error("No unreleased version present in changelog");
-				return false;
+				version = new Version();
+				changeLog.Versions.Add(version);
 			}
 
 			var list = section switch

@@ -88,7 +88,7 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
-		public async Task AddToSectionShouldFailWhenNoUnreleasedVersionIsPresent()
+		public async Task AddToSectionShouldNotFailWhenNoUnreleasedVersionIsPresent()
 		{
 			// Arrange
 			var serializer = Substitute.For<IChangeLogSerializer>();
@@ -111,7 +111,7 @@ namespace Changey.Tests.Services
 			await sut.AddToSection(fileName, Section.Added, "test");
 
 			// Assert
-			logger.Received(1).Error(Arg.Is<string>(x => x.Contains("unreleased version")));
+			logger.DidNotReceive().Error(Arg.Any<string>());
 		}
 
 		[Theory]
