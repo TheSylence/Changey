@@ -55,4 +55,4 @@ List of possible sections:
 
 ## Build from source
 
-You can either use `dotnet build` (.NET 5.0 SDK required) to build the sources or use Visual Studio 2019 16.8 or later and open the Changey.sln file.
+You can either use `dotnet build` (.NET 5.0 SDK required) to build the sources or use Visual Studio 2019 16.8 or later (or Rider 2021.2 or later) and open the Changey.sln file.
