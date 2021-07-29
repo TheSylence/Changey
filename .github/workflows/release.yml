@@ -33,3 +33,9 @@ jobs:
 
     - name: Push nuget package
       run: dotnet nuget push ./Changey/nupkg/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_KEY }} --no-symbols true -s https://api.nuget.org/v3/index.json 
+      
+    - name: Create github release
+      uses: ncipollo/release-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "Changey/nupkg/*.nupkg"
