@@ -15,3 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Display correct version when invoking tool (#20)
 
+## [Unreleased]
+### Changed
+- Hide exception stacktraces unless verbose logging is enabled (#21)
+

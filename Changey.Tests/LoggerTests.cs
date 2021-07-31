@@ -8,6 +8,23 @@ namespace Changey.Tests
 	public class LoggerTests
 	{
 		[Fact]
+		public void ErrorExceptionShouldNotBeWrittenWhenNotVerbose()
+		{
+			// Arrange
+			using var output = new StringWriter();
+			var sut = new Logger(output, false, false);
+			var exception = new Exception("test-exception");
+			exception.SetStackTrace(new StackTrace());
+
+			// Act
+			sut.Error("test", exception);
+
+			// Assert
+			var logOutput = output.ToString();
+			Assert.DoesNotContain("test-exception", logOutput);
+		}
+
+		[Fact]
 		public void ErrorExceptionShouldNotWriteToOutputWhenSilent()
 		{
 			// Arrange
@@ -26,7 +43,7 @@ namespace Changey.Tests
 		{
 			// Arrange
 			using var output = new StringWriter();
-			var sut = new Logger(output, false, false);
+			var sut = new Logger(output, false, true);
 			var exception = new Exception("test-exception");
 			exception.SetStackTrace(new StackTrace());
 

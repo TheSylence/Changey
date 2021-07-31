@@ -18,7 +18,16 @@ namespace Changey.Services
 		{
 			_logger.Verbose($"Adding new '{section}' to '{path}'");
 
-			var changeLog = await _changeLogSerializer.Deserialize(path);
+			ChangeLog changeLog;
+			try
+			{
+				changeLog = await _changeLogSerializer.Deserialize(path);
+			}
+			catch (Exception ex)
+			{
+				_logger.Error($"Failed to read file '{path}'", ex);
+				return;
+			}
 
 			if (!AddToSection(changeLog, section, message))
 			{

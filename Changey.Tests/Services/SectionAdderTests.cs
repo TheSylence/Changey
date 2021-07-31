@@ -87,33 +87,6 @@ namespace Changey.Tests.Services
 			logger.Received(1).Error(Arg.Is<string>(x => x.Contains("section")));
 		}
 
-		[Fact]
-		public async Task AddToSectionShouldNotFailWhenNoUnreleasedVersionIsPresent()
-		{
-			// Arrange
-			var serializer = Substitute.For<IChangeLogSerializer>();
-			const string fileName = "path";
-			serializer.Deserialize(fileName).Returns(Task.FromResult(new ChangeLog
-			{
-				Versions = new List<Version>
-				{
-					new()
-					{
-						ReleaseDate = DateTime.Now
-					}
-				}
-			}));
-
-			var logger = Substitute.For<ILogger>();
-			var sut = new SectionAdder(serializer, logger);
-
-			// Act
-			await sut.AddToSection(fileName, Section.Added, "test");
-
-			// Assert
-			logger.DidNotReceive().Error(Arg.Any<string>());
-		}
-
 		[Theory]
 		[InlineData("Added", "add-message")]
 		[InlineData("Removed", "remove-message")]
@@ -144,6 +117,51 @@ namespace Changey.Tests.Services
 
 			// Assert
 			logger.Received(1).Verbose(Arg.Any<string>());
+		}
+
+		[Fact]
+		public async Task AddToSectionShouldNotAddWhenDeserializationFails()
+		{
+			// Arrange
+			var logger = Substitute.For<ILogger>();
+			var serializer = Substitute.For<IChangeLogSerializer>();
+			serializer.Deserialize(Arg.Any<string>()).Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
+
+			var sut = new SectionAdder(serializer, logger);
+
+			// Act
+			await sut.AddToSection("path", Section.Added, "test message");
+
+			// Assert
+			logger.Received(1).Error(Arg.Any<string>(), Arg.Is<Exception>(e => e.Message == "test-exception"));
+			await serializer.DidNotReceive().Serialize(Arg.Any<ChangeLog>(), Arg.Any<string>());
+		}
+
+		[Fact]
+		public async Task AddToSectionShouldNotFailWhenNoUnreleasedVersionIsPresent()
+		{
+			// Arrange
+			var serializer = Substitute.For<IChangeLogSerializer>();
+			const string fileName = "path";
+			serializer.Deserialize(fileName).Returns(Task.FromResult(new ChangeLog
+			{
+				Versions = new List<Version>
+				{
+					new()
+					{
+						ReleaseDate = DateTime.Now
+					}
+				}
+			}));
+
+			var logger = Substitute.For<ILogger>();
+			var sut = new SectionAdder(serializer, logger);
+
+			// Act
+			await sut.AddToSection(fileName, Section.Added, "test");
+
+			// Assert
+			logger.DidNotReceive().Error(Arg.Any<string>());
 		}
 
 		[Fact]

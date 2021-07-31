@@ -22,9 +22,11 @@ namespace Changey
 		{
 			if (_silent)
 				return;
-			
+
 			_output.WriteLine(message);
-			_output.WriteLine(exception);
+
+			if (_verbose)
+				_output.WriteLine(exception);
 		}
 
 		public void Info(string message)
