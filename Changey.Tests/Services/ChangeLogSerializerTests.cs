@@ -728,5 +728,51 @@ namespace Changey.Tests.Services
 			Assert.NotEmpty(actual);
 			Assert.DoesNotContain("semver.org", actual);
 		}
+
+		[Fact]
+		public async Task UnreleasedVersionShouldBeWrittenToTopOfChangelog()
+		{
+			// Arrange
+			var changeLog = new ChangeLog
+			{
+				Versions = new List<Version>
+				{
+					new()
+					{
+						ReleaseDate = new DateTime(2021, 1, 2),
+						Name = "1.1"
+					},
+					new()
+					{
+						ReleaseDate = null
+					},
+					new()
+					{
+						ReleaseDate = new DateTime(2020, 12, 20),
+						Name = "1.0"
+					}
+				}
+			};
+
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
+
+			// Act
+			await sut.Serialize(changeLog, "");
+
+			// Assert
+			var actual = fileAccess.ContentWritten;
+
+			var indexOfOneZero = actual.IndexOf("[1.0]", StringComparison.Ordinal);
+			var indexOfOneOne = actual.IndexOf("[1.1]", StringComparison.Ordinal);
+			var indexOfUnreleased = actual.IndexOf("[Unreleased]", StringComparison.Ordinal);
+
+			Assert.NotEqual(-1, indexOfOneOne);
+			Assert.NotEqual(-1, indexOfOneZero);
+			Assert.NotEqual(-1, indexOfUnreleased);
+
+			Assert.True(indexOfUnreleased < indexOfOneOne);
+			Assert.True(indexOfOneOne < indexOfOneZero);
+		}
 	}
 }

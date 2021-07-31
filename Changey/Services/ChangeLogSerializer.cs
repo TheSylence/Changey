@@ -209,7 +209,7 @@ namespace Changey.Services
 
 			WriteHeader(changeLog, sb);
 
-			foreach (var version in changeLog.Versions)
+			foreach (var version in changeLog.Versions.OrderByDescending( v => v.ReleaseDate ?? DateTime.MaxValue))
 			{
 				WriteVersion(sb, version);
 			}

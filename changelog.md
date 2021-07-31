@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Hide exception stacktraces unless verbose logging is enabled (#21)
+
+### Fixed
+- Ensure versions are sorted by release date in changelog (#26)
+
 ## [0.2] - 2021-07-29
 ### Added
 - Usage examples for verbs in help screen (#10)
@@ -14,8 +21,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.2] - 2021-07-29
 ### Fixed
 - Display correct version when invoking tool (#20)
-
-## [Unreleased]
-### Changed
-- Hide exception stacktraces unless verbose logging is enabled (#21)
 
