@@ -72,7 +72,7 @@ namespace Changey.Tests
 		public void FindCommandShouldForReleaseOption()
 		{
 			// Arrange
-			var option = new ReleaseOption(null, string.Empty, string.Empty, false, false);
+			var option = new ReleaseOption(null, false, string.Empty, string.Empty, false, false);
 			var sut = new TypeLoader();
 
 			// Act

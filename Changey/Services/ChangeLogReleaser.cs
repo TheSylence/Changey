@@ -13,7 +13,7 @@ namespace Changey.Services
 			_changeLogSerializer = changeLogSerializer;
 		}
 
-		public async Task<bool> Release(string path, string? date, string version)
+		public async Task<bool> Release(string path, string? date, string version, bool forceRelease)
 		{
 			var releaseDate = DetermineDate(date);
 			_logger.Verbose($"Releasing version {version} on {releaseDate.Date} in {path}");
@@ -30,6 +30,28 @@ namespace Changey.Services
 			{
 				_logger.Error("No unreleased version found in changelog");
 				return false;
+			}
+			
+			if (Version.TryParse(version, out var versionToRelease) && !forceRelease)
+			{
+				var releasedVersions = changeLog.Versions.Where(v => v.ReleaseDate != null).ToList();
+				
+				var badVersions = releasedVersions.Where(v => !Version.TryParse(v.Name, out _));
+				if (!badVersions.Any())
+				{
+					var newerVersions = releasedVersions.Where(v => Version.Parse(v.Name) >= versionToRelease).ToList();
+					if (newerVersions.Any())
+					{
+						_logger.Warning("You are trying to release a version that is older than already released version(s)");
+						foreach (var newerVersion in newerVersions)
+						{
+							_logger.Warning($"Version '{newerVersion.Name}' is newer that version to be released '{versionToRelease}'");
+						}
+
+						_logger.Warning("Specify -f flag to force releasing this version anyways.");
+						return false;
+					}
+				}
 			}
 
 			unreleased.ReleaseDate = releaseDate;

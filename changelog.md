@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Hide exception stacktraces unless verbose logging is enabled (#21)
+- Warn when trying to release version that is older than a previous released version (#23)
 
 ### Fixed
 - Ensure versions are sorted by release date in changelog (#26)

@@ -15,16 +15,16 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
-			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
 				.Returns(Task.FromResult(true));
-			var option = new ReleaseOption(null, "1.2.3", "file.name", false, false);
+			var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
 			var sut = new ReleaseCommand(option, changeLogReleaser);
 
 			// Act
 			await sut.Execute();
 
 			// Assert
-			await changeLogReleaser.Received(1).Release("file.name", null, "1.2.3");
+			await changeLogReleaser.Received(1).Release("file.name", null, "1.2.3", false);
 		}
 
 		[Fact]
@@ -32,10 +32,10 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
-			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
 				.Returns(Task.FromResult(false));
 
-			var option = new ReleaseOption(null, "1.2.3", "file.name", false, false);
+			var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
 
 			var logger = Substitute.For<ILogger>();
 			option.InjectLogger(logger);
@@ -54,10 +54,10 @@ namespace Changey.Tests.Commands
 		{
 			// Arrange
 			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
-			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
 				.Returns(Task.FromException<bool>(new Exception("test-exception")));
 
-			var option = new ReleaseOption(null, "1.2.3", "file.name", false, false);
+			var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
 
 			var logger = Substitute.For<ILogger>();
 			option.InjectLogger(logger);

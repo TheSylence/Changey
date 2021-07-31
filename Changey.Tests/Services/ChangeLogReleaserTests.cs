@@ -30,10 +30,43 @@ namespace Changey.Tests.Services
 			var fileName = Path.GetTempFileName();
 
 			// Act
-			var actual = await sut.Release(fileName, null, "1.2");
+			var actual = await sut.Release(fileName, null, "1.2", false);
 
 			// Assert
 			Assert.False(actual);
+		}
+
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public async Task ReleaseShouldNotReleaseOlderVersionUnlessForced(bool force)
+		{
+			// Arrange
+			var existingChangeLog = new ChangeLog();
+			existingChangeLog.Versions.Add(new Version
+			{
+				ReleaseDate = DateTime.Now,
+				Name = "1.0.0"
+			});
+			existingChangeLog.Versions.Add(new Version
+			{
+				ReleaseDate = null
+			});
+
+			const string version = "0.9.0";
+			var fileName = Path.GetTempFileName();
+
+			var logger = Substitute.For<ILogger>();
+			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+			changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
+			
+			var sut = new ChangeLogReleaser(logger, changeLogSerializer);
+
+			// Act
+			var actual = await sut.Release(fileName, null, version, force);
+
+			// Assert
+			Assert.Equal(force, actual);
 		}
 
 		[Fact]
@@ -54,7 +87,7 @@ namespace Changey.Tests.Services
 			var sut = new ChangeLogReleaser(logger, changeLogSerializer);
 
 			// Act
-			var ex = await Record.ExceptionAsync(async () => await sut.Release("", null, "1"));
+			var ex = await Record.ExceptionAsync(async () => await sut.Release("", null, "1", false));
 
 			// Assert
 			Assert.Null(ex);
@@ -80,7 +113,7 @@ namespace Changey.Tests.Services
 			const string date = "2020-12-02";
 
 			// Act
-			var actual = await sut.Release(fileName, date, version);
+			var actual = await sut.Release(fileName, date, version, false);
 
 			// Assert
 			Assert.True(actual);
@@ -108,11 +141,10 @@ namespace Changey.Tests.Services
 			const string version = "1.2.3";
 
 			// Act
-			var actual = await sut.Release(fileName, null, version);
+			var actual = await sut.Release(fileName, null, version, false);
 
 			// Assert
 			Assert.True(actual);
-
 
 			await changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(x =>
 					x.Versions.First().ReleaseDate!.Value.Date == DateTime.Now.Date && x.Versions.First().Name == "1.2.3"),

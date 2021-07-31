@@ -17,7 +17,7 @@ namespace Changey.Commands
 		{
 			try
 			{
-				if (!await _changeLogReleaser.Release(_option.Path, _option.Date, _option.Name))
+				if (!await _changeLogReleaser.Release(_option.Path, _option.Date, _option.Name, _option.Force))
 					_option.Logger.Warning("Could not release version");
 				else
 					_option.Logger.Verbose("Released version");
