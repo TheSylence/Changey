@@ -2,6 +2,7 @@
 using Changey.Models;
 using CommandLine;
 using CommandLine.Text;
+using JetBrains.Annotations;
 
 namespace Changey.Options
 {
@@ -13,7 +14,9 @@ namespace Changey.Options
 		{
 		}
 
-		[Usage(ApplicationAlias = "changey")] public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<SecurityOption>();
+		[Usage(ApplicationAlias = "changey")]
+		[UsedImplicitly]
+		public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<SecurityOption>();
 		
 		internal override Section Section => Section.Security;
 	}

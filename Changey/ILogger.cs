@@ -1,7 +1,9 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Changey
 {
+	[PublicAPI]
 	internal interface ILogger
 	{
 		void Error(string message);

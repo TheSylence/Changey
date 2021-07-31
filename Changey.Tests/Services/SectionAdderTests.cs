@@ -14,7 +14,7 @@ namespace Changey.Tests.Services
 	{
 		private static Section SectionFromName(string sectionName) => Enum.Parse<Section>(sectionName);
 
-		private static IList<Change> SectionList(Version version, Section section)
+		private static IEnumerable<Change> SectionList(Version version, Section section)
 		{
 			return section switch
 			{
@@ -44,7 +44,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version()
+					new()
 				}
 			}));
 
@@ -73,7 +73,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version()
+					new()
 				}
 			}));
 
@@ -97,7 +97,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = DateTime.Now
 					}
@@ -130,7 +130,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version()
+					new()
 				}
 			}));
 
@@ -156,7 +156,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version()
+					new()
 				}
 			}));
 

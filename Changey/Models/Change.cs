@@ -1,4 +1,5 @@
-﻿namespace Changey.Models
+﻿// ReSharper disable PropertyCanBeMadeInitOnly.Global
+namespace Changey.Models
 {
 	internal class Change
 	{

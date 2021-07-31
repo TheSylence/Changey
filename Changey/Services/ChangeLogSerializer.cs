@@ -43,7 +43,7 @@ namespace Changey.Services
 			await _fileAccess.WriteToFile(path, content);
 		}
 
-		private void AddChange(Version version, string sectionName, string changeText)
+		private static void AddChange(Version version, string sectionName, string changeText)
 		{
 			var listToAdd = sectionName switch
 			{
@@ -59,7 +59,7 @@ namespace Changey.Services
 			listToAdd?.Add(new Change {Text = changeText});
 		}
 
-		private int FindHeader(IList<string> lines)
+		private static int FindHeader(IList<string> lines)
 		{
 			for (var i = 0; i < lines.Count; ++i)
 			{
@@ -70,7 +70,7 @@ namespace Changey.Services
 			return -1;
 		}
 
-		private int FindNextChangeSection(IList<string> lines, int offset, int nextVersionOffset)
+		private static int FindNextChangeSection(IList<string> lines, int offset, int nextVersionOffset)
 		{
 			for (var i = offset; i < nextVersionOffset; ++i)
 			{
@@ -81,7 +81,7 @@ namespace Changey.Services
 			return -1;
 		}
 
-		private int FindVersion(IList<string> lines, int offset)
+		private static int FindVersion(IList<string> lines, int offset)
 		{
 			for (var i = offset; i < lines.Count; ++i)
 			{
@@ -92,7 +92,7 @@ namespace Changey.Services
 			return -1;
 		}
 
-		private int ParseHeader(IList<string> lines, int offset, ChangeLog changeLog)
+		private static int ParseHeader(IList<string> lines, int offset, ChangeLog changeLog)
 		{
 			var keepAChangeLogLine = lines[offset + 3];
 
@@ -101,18 +101,17 @@ namespace Changey.Services
 
 			offset += 4;
 			var semVerLine = lines[offset];
-			if (!string.IsNullOrEmpty(semVerLine))
-			{
-				if (semVerLine.Contains("semver.org"))
-					changeLog.UsesSemVer = true;
+			if (string.IsNullOrEmpty(semVerLine))
+				return offset;
+			
+			if (semVerLine.Contains("semver.org"))
+				changeLog.UsesSemVer = true;
 
-				offset++;
-			}
-
+			offset++;
 			return offset;
 		}
 
-		private int ParseSection(IList<string> lines, int offset, Version version)
+		private static int ParseSection(IList<string> lines, int offset, Version version)
 		{
 			var sb = new StringBuilder();
 			var sectionName = lines[offset].TrimStart('#').Trim();
@@ -150,49 +149,49 @@ namespace Changey.Services
 			return -1;
 		}
 
-		private int ParseVersion(IList<string> lines, int offset, ChangeLog changeLog)
+		private static int ParseVersion(IList<string> lines, int offset, ChangeLog changeLog)
 		{
 			offset = FindVersion(lines, offset);
 			if (offset < 0)
 				return offset;
 
 			var match = VersionPattern.Match(lines[offset]);
-			if (match.Success)
+			if (!match.Success)
+				return offset;
+			
+			var version = new Version
 			{
-				var version = new Version
-				{
-					Name = match.Groups[1].Value
-				};
+				Name = match.Groups[1].Value
+			};
 
-				if (!string.IsNullOrEmpty(match.Groups[2].Value))
-				{
-					version.ReleaseDate =
-						DateTime.ParseExact(match.Groups[2].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-				}
-
-				if (!string.IsNullOrEmpty(match.Groups[3].Value))
-					version.Yanked = true;
-
-				changeLog.Versions.Add(version);
-
-				var nextVersionOffset = FindVersion(lines, offset + 1);
-				nextVersionOffset = nextVersionOffset < 0 ? lines.Count : nextVersionOffset;
-
-				var nextSectionOffset = offset;
-				while ((nextSectionOffset = FindNextChangeSection(lines, nextSectionOffset, nextVersionOffset)) >= 0)
-				{
-					nextSectionOffset = ParseSection(lines, nextSectionOffset, version);
-					if (nextSectionOffset < 0)
-						break;
-				}
-
-				offset = nextVersionOffset - 1;
+			if (!string.IsNullOrEmpty(match.Groups[2].Value))
+			{
+				version.ReleaseDate =
+					DateTime.ParseExact(match.Groups[2].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 			}
+
+			if (!string.IsNullOrEmpty(match.Groups[3].Value))
+				version.Yanked = true;
+
+			changeLog.Versions.Add(version);
+
+			var nextVersionOffset = FindVersion(lines, offset + 1);
+			nextVersionOffset = nextVersionOffset < 0 ? lines.Count : nextVersionOffset;
+
+			var nextSectionOffset = offset;
+			while ((nextSectionOffset = FindNextChangeSection(lines, nextSectionOffset, nextVersionOffset)) >= 0)
+			{
+				nextSectionOffset = ParseSection(lines, nextSectionOffset, version);
+				if (nextSectionOffset < 0)
+					break;
+			}
+
+			offset = nextVersionOffset - 1;
 
 			return offset;
 		}
 
-		private void ParseVersions(IList<string> lines, int offset, ChangeLog changeLog)
+		private static void ParseVersions(IList<string> lines, int offset, ChangeLog changeLog)
 		{
 			for (var i = offset; i < lines.Count; ++i)
 			{
@@ -204,7 +203,7 @@ namespace Changey.Services
 			}
 		}
 
-		private string Serialize(ChangeLog changeLog)
+		private static string Serialize(ChangeLog changeLog)
 		{
 			var sb = new StringBuilder();
 
@@ -218,7 +217,7 @@ namespace Changey.Services
 			return sb.ToString();
 		}
 
-		private string TitleForSection(Section section)
+		private static string TitleForSection(Section section)
 		{
 			return section switch
 			{
@@ -232,7 +231,7 @@ namespace Changey.Services
 			};
 		}
 
-		private void WriteChanges(StringBuilder sb, Section section, IList<Change> changes)
+		private static void WriteChanges(StringBuilder sb, Section section, IList<Change> changes)
 		{
 			if (!changes.Any())
 				return;
@@ -264,7 +263,7 @@ namespace Changey.Services
 			sb.AppendLine();
 		}
 
-		private void WriteVersion(StringBuilder sb, Version version)
+		private static void WriteVersion(StringBuilder sb, Version version)
 		{
 			sb.Append("## ");
 			sb.Append(version.ReleaseDate.HasValue
@@ -294,6 +293,6 @@ namespace Changey.Services
 		private const string SecuritySection = "Security";
 
 		private static readonly Regex VersionPattern =
-			new Regex("\\[([\\w\\.]+)\\](?: - (\\d{4}-\\d{2}-\\d{2})( \\[YANKED\\])?)?", RegexOptions.Compiled);
+			new("\\[([\\w\\.]+)\\](?: - (\\d{4}-\\d{2}-\\d{2})( \\[YANKED\\])?)?", RegexOptions.Compiled);
 	}
 }

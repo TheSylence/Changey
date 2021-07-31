@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CommandLine;
 using CommandLine.Text;
+using JetBrains.Annotations;
 
 namespace Changey.Options
 {
@@ -15,6 +16,7 @@ namespace Changey.Options
 		}
 
 		[Usage(ApplicationAlias = "changey")]
+		[UsedImplicitly]
 		public static IEnumerable<Example> Examples
 		{
 			get

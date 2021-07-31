@@ -20,7 +20,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version()
+					new()
 				}
 			};
 
@@ -46,7 +46,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = DateTime.Now
 					}
@@ -94,7 +94,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = DateTime.Now
 					}

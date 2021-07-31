@@ -34,7 +34,7 @@ namespace Changey.Services
 				UsesSemVer = usesSemver,
 				Versions = new List<Version>
 				{
-					new Version()
+					new()
 				}
 			};
 

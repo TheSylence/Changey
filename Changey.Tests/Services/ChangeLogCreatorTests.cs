@@ -33,7 +33,7 @@ namespace Changey.Tests.Services
 		public async Task CreateChangeLogShouldNotThrowWhenFileCantBeWritten()
 		{
 			// Arrange
-			var fileName = "!invalid?file:name";
+			const string fileName = "!invalid?file:name";
 
 			var logger = Substitute.For<ILogger>();
 			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();

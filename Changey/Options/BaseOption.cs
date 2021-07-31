@@ -1,8 +1,10 @@
 ﻿using System;
 using CommandLine;
+using JetBrains.Annotations;
 
 namespace Changey.Options
 {
+	[PublicAPI]
 	internal abstract class BaseOption
 	{
 		protected BaseOption(string path, bool silent, bool verbose)

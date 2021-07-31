@@ -15,7 +15,7 @@ namespace Changey.Tests
 			}
 		}
 
-		public static TheoryData<object> SectionOptions => new TheoryData<object>
+		public static TheoryData<object> SectionOptions => new()
 		{
 			new AddOption("test", string.Empty, false, false),
 			new ChangeOption("test", string.Empty, false, false),

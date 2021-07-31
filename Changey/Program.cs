@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Changey
 			_helpWriter = helpWriter ?? Console.Out;
 		}
 
-		internal async Task Run(string[] args)
+		internal async Task Run(IEnumerable<string> args)
 		{
 			var commandTypes = _loader.LoadOptionTypes().ToArray();
 

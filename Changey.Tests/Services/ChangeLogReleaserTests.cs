@@ -76,8 +76,8 @@ namespace Changey.Tests.Services
 			var sut = new ChangeLogReleaser(logger, changeLogSerializer);
 
 			var fileName = Path.GetTempFileName();
-			var version = "1.2.3";
-			var date = "2020-12-02";
+			const string version = "1.2.3";
+			const string date = "2020-12-02";
 
 			// Act
 			var actual = await sut.Release(fileName, date, version);
@@ -105,7 +105,7 @@ namespace Changey.Tests.Services
 			var sut = new ChangeLogReleaser(logger, changeLogSerializer);
 
 			var fileName = Path.GetTempFileName();
-			var version = "1.2.3";
+			const string version = "1.2.3";
 
 			// Act
 			var actual = await sut.Release(fileName, null, version);

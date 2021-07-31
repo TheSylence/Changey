@@ -20,11 +20,11 @@ namespace Changey
 
 		public void Error(string message, Exception exception)
 		{
-			if (!_silent)
-			{
-				_output.WriteLine(message);
-				_output.WriteLine(exception);
-			}
+			if (_silent)
+				return;
+			
+			_output.WriteLine(message);
+			_output.WriteLine(exception);
 		}
 
 		public void Info(string message)

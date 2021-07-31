@@ -48,7 +48,7 @@ namespace Changey.Services
 			return true;
 		}
 
-		private DateTime DetermineDate(string? date) => string.IsNullOrEmpty(date)
+		private static DateTime DetermineDate(string? date) => string.IsNullOrEmpty(date)
 			? DateTime.Now
 			: DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 

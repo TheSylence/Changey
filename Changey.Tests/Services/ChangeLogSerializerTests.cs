@@ -468,20 +468,20 @@ namespace Changey.Tests.Services
 				UsesSemVer = true,
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						Added = new List<Change>
 						{
-							new Change {Text = "add"}
+							new() {Text = "add"}
 						}
 					},
-					new Version
+					new()
 					{
 						ReleaseDate = new DateTime(2019, 1, 1),
 						Name = "1.2",
 						Changed = new List<Change>
 						{
-							new Change {Text = "change"}
+							new() {Text = "change"}
 						}
 					}
 				}
@@ -519,45 +519,45 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = new DateTime(2019, 4, 26),
 						Name = "1.2.3",
 						Added = new List<Change>
 						{
-							new Change {Text = "AddA"},
-							new Change {Text = "AddB"},
-							new Change {Text = "AddC"}
+							new() {Text = "AddA"},
+							new() {Text = "AddB"},
+							new() {Text = "AddC"}
 						},
 						Deprecated = new List<Change>
 						{
-							new Change {Text = "DeprecatedA"},
-							new Change {Text = "DeprecatedB"},
-							new Change {Text = "DeprecatedC"}
+							new() {Text = "DeprecatedA"},
+							new() {Text = "DeprecatedB"},
+							new() {Text = "DeprecatedC"}
 						},
 						Fixed = new List<Change>
 						{
-							new Change {Text = "FixedA"},
-							new Change {Text = "FixedB"},
-							new Change {Text = "FixedC"}
+							new() {Text = "FixedA"},
+							new() {Text = "FixedB"},
+							new() {Text = "FixedC"}
 						},
 						Removed = new List<Change>
 						{
-							new Change {Text = "RemovedA"},
-							new Change {Text = "RemovedB"},
-							new Change {Text = "RemovedC"}
+							new() {Text = "RemovedA"},
+							new() {Text = "RemovedB"},
+							new() {Text = "RemovedC"}
 						},
 						Security = new List<Change>
 						{
-							new Change {Text = "SecurityA"},
-							new Change {Text = "SecurityB"},
-							new Change {Text = "SecurityC"}
+							new() {Text = "SecurityA"},
+							new() {Text = "SecurityB"},
+							new() {Text = "SecurityC"}
 						},
 						Changed = new List<Change>
 						{
-							new Change {Text = "ChangedA"},
-							new Change {Text = "ChangedB"},
-							new Change {Text = "ChangedC"}
+							new() {Text = "ChangedA"},
+							new() {Text = "ChangedB"},
+							new() {Text = "ChangedC"}
 						}
 					}
 				}
@@ -612,7 +612,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = new DateTime(2019, 4, 26),
 						Name = "1.2.3"
@@ -640,7 +640,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = null
 					}
@@ -688,7 +688,7 @@ namespace Changey.Tests.Services
 			{
 				Versions = new List<Version>
 				{
-					new Version
+					new()
 					{
 						ReleaseDate = new DateTime(2019, 4, 26),
 						Name = "1.2.3",
@@ -727,20 +727,6 @@ namespace Changey.Tests.Services
 			var actual = fileAccess.ContentWritten;
 			Assert.NotEmpty(actual);
 			Assert.DoesNotContain("semver.org", actual);
-		}
-	}
-
-	internal class MockFileAccess : IFileAccess
-	{
-		public string ContentRead { get; set; } = string.Empty;
-		public string ContentWritten { get; private set; } = string.Empty;
-
-		public Task<string> ReadFromFile(string path) => Task.FromResult(ContentRead);
-
-		public Task WriteToFile(string path, string content)
-		{
-			ContentWritten = content;
-			return Task.CompletedTask;
 		}
 	}
 }

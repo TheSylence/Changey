@@ -10,7 +10,7 @@ namespace Changey.Tests
 {
 	public class ProgramTests
 	{
-		private string[] SplitArgs(string args) => args.Split(' ');
+		private static string[] SplitArgs(string args) => args.Split(' ');
 
 		[Fact]
 		public async Task AddShouldTreatUnnamedOptionAsMessage()
@@ -44,7 +44,7 @@ namespace Changey.Tests
 			var sut = new Program(null, writer);
 
 			// Act
-			await sut.Run(new string[0]);
+			await sut.Run(Array.Empty<string>());
 
 			// Assert
 			var output = writer.ToString();
