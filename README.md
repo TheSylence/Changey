@@ -37,6 +37,13 @@ It will fail when the changelog already exists unless the `-o` option is set.
 
 `changey release 1.2.3 -d 2020-05-13` will add 1.2.3 as a relased version on May the 13th, 2020 to the changelog.
 
+You will be warned (and the relase will be aborted) when you are trying to release a version that is older than a previously released version.
+I.e. when there is a released version 1.2.1 and you try to release a version 1.2.0 it will fail.
+
+You can force a release by specifing the `-f` flag:
+
+`changey release 1.2.0 -f`
+
 ### Adding changes
 
 `changey add "Added a cool feature"` will add "Added a cool feature" under the "Add" section to the changelog. (Make sure to suround your message with quotes if it contains spaces.)
