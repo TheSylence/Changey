@@ -26,6 +26,20 @@ namespace Changey.Tests
 		};
 
 		[Fact]
+		public void FindCommandShouldFindForExtractOption()
+		{
+			// Arrange
+			var option = new ExtractOption(false, "", "", "", false, false);
+			var sut = new TypeLoader();
+
+			// Act
+			var actual = sut.FindCommand(option);
+
+			// Assert
+			Assert.IsType<ExtractCommand>(actual);
+		}
+
+		[Fact]
 		public void FindCommandShouldFindForInitOptions()
 		{
 			// Arrange
@@ -44,7 +58,7 @@ namespace Changey.Tests
 		public void FindCommandShouldFindForSectionOptions(object arg)
 		{
 			// Arrange
-			var option = (SectionOption) arg;
+			var option = (SectionOption)arg;
 			var sut = new TypeLoader();
 
 			// Act

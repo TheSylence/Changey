@@ -9,14 +9,15 @@ namespace Changey.Tests
 {
 	internal class IntegrationTestRunner
 	{
-		public IntegrationTestRunner(Program program)
+		public IntegrationTestRunner(Program program, bool autoAppendChangelogPath = true)
 		{
 			_program = program;
+			_autoAppendChangelogPath = autoAppendChangelogPath;
 		}
 
 		public void AddPass(string command, Func<string, IEnumerable<string>> validator)
 		{
-			_passes.Add(new IntegrationTestRunPass(command, validator));
+			_passes.Add(new IntegrationTestRunPass(command, validator, _autoAppendChangelogPath));
 		}
 
 		public void AddPass(string command, string[] expectedSubstrings, string[] forbiddenSubstrings)
@@ -33,7 +34,7 @@ namespace Changey.Tests
 				var errors = missingSubstrings.Concat(forbiddenMatches).ToList();
 
 				return errors;
-			});
+			}, _autoAppendChangelogPath);
 
 			_passes.Add(pass);
 		}
@@ -57,12 +58,13 @@ namespace Changey.Tests
 
 		private readonly List<IntegrationTestRunPass> _passes = new();
 		private readonly Program _program;
+		private readonly bool _autoAppendChangelogPath;
 
 		private class IntegrationTestRunPass
 		{
-			public IntegrationTestRunPass(string command, Func<string, IEnumerable<string>> validator)
+			public IntegrationTestRunPass(string command, Func<string, IEnumerable<string>> validator, bool autoAppendChangelogPath)
 			{
-				_command = command;
+				_command = AppendChangeLogPath(command, autoAppendChangelogPath);
 				_validator = validator;
 			}
 
@@ -73,6 +75,14 @@ namespace Changey.Tests
 			}
 
 			public IEnumerable<string> Validate(string content) => _validator(content);
+
+			private string AppendChangeLogPath(string command, bool append)
+			{
+				if (!append)
+					return command;
+
+				return command + " -p %changelogpath%";
+			}
 
 			private IEnumerable<string> SplitCommandArgs(string changeLogPath)
 			{

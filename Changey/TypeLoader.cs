@@ -23,6 +23,7 @@ namespace Changey
 				SectionOption s => Section(s),
 				YankOption y => Yank(y),
 				ReleaseOption r => Release(r),
+				ExtractOption e => Extract(e),
 				_ => throw new ArgumentException($"Failed to find command for {option.GetType()}")
 			};
 		}
@@ -38,6 +39,13 @@ namespace Changey
 			yield return typeof(FixOption);
 			yield return typeof(RemoveOption);
 			yield return typeof(SecurityOption);
+			yield return typeof(ExtractOption);
+		}
+
+		private ICommand Extract(ExtractOption extractOption)
+		{
+			var extractor = new Extractor(extractOption.Logger, _changeLogSerializer);
+			return new ExtractCommand(extractOption, extractor);
 		}
 
 		private ICommand Init(InitOption option)

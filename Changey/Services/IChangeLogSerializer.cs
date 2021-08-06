@@ -7,5 +7,6 @@ namespace Changey.Services
 	{
 		Task<ChangeLog> Deserialize(string path);
 		Task Serialize(ChangeLog changeLog, string path);
+		Task Serialize(Version version, string path, bool header);
 	}
 }

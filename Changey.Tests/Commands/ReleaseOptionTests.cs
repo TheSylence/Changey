@@ -64,7 +64,6 @@ namespace Changey.Tests.Commands
 
 			var sut = new ReleaseCommand(option, changeLogReleaser);
 
-
 			// Act
 			await sut.Execute();
 

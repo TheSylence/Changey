@@ -61,6 +61,7 @@ namespace Changey.Tests
 		[InlineData("remove")]
 		[InlineData("fix")]
 		[InlineData("deprecate")]
+		[InlineData("extract")]
 		public async Task HelpScreenShouldContainExamples(string command)
 		{
 			// Arrange
@@ -92,7 +93,7 @@ namespace Changey.Tests
 			var expectedVerbs = new[]
 			{
 				"init", "release", "yank", "add", "change", "fix",
-				"security", "remove", "deprecate", "version"
+				"security", "remove", "deprecate", "version", "extract"
 			};
 
 			foreach (var expectedVerb in expectedVerbs)
@@ -111,6 +112,7 @@ namespace Changey.Tests
 		[InlineData("remove")]
 		[InlineData("fix")]
 		[InlineData("deprecate")]
+		[InlineData("extract")]
 		public async Task HelpShouldDisplayHelpWhenVerbIsSpecified(string verb)
 		{
 			// Arrange

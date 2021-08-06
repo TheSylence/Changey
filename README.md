@@ -59,6 +59,17 @@ List of possible sections to add to:
 Use them as a verb when invoking changey:
 `changey change` to add to the "Change" section, `changey deprecate` for the "Deprecate" section and so on.
 
+### Extracting parts of a changelog
+
+The changes for a single version can be extracted to a file that can be used to document changes of a single version.
+This is useful when informing users of a new release for example.
+
+`changey extract 1.2.3 -t changes_1.2.3.md`
+
+Will write all changes for version 1.2.3 from the current changelog to a file called *changes_1.2.3.md*
+
+Specify the `-h` flag if you want to include the name and release date of the version in the generated file.
+
 ### Yanking a release version
 
 `changey yank` will mark the last released version as yanked.

@@ -43,6 +43,13 @@ namespace Changey.Services
 			await _fileAccess.WriteToFile(path, content);
 		}
 
+		public async Task Serialize(Version version, string path, bool header)
+		{
+			var sb = new StringBuilder();
+			WriteVersion(sb, version, header);
+			await _fileAccess.WriteToFile(path, sb.ToString());
+		}
+
 		private static void AddChange(Version version, string sectionName, string changeText)
 		{
 			var listToAdd = sectionName switch
@@ -103,7 +110,7 @@ namespace Changey.Services
 			var semVerLine = lines[offset];
 			if (string.IsNullOrEmpty(semVerLine))
 				return offset;
-			
+
 			if (semVerLine.Contains("semver.org"))
 				changeLog.UsesSemVer = true;
 
@@ -158,7 +165,7 @@ namespace Changey.Services
 			var match = VersionPattern.Match(lines[offset]);
 			if (!match.Success)
 				return offset;
-			
+
 			var version = new Version
 			{
 				Name = match.Groups[1].Value
@@ -209,9 +216,9 @@ namespace Changey.Services
 
 			WriteHeader(changeLog, sb);
 
-			foreach (var version in changeLog.Versions.OrderByDescending( v => v.ReleaseDate ?? DateTime.MaxValue))
+			foreach (var version in changeLog.Versions.OrderByDescending(v => v.ReleaseDate ?? DateTime.MaxValue))
 			{
-				WriteVersion(sb, version);
+				WriteVersion(sb, version, true);
 			}
 
 			return sb.ToString();
@@ -263,17 +270,20 @@ namespace Changey.Services
 			sb.AppendLine();
 		}
 
-		private static void WriteVersion(StringBuilder sb, Version version)
+		private static void WriteVersion(StringBuilder sb, Version version, bool includeHeader)
 		{
-			sb.Append("## ");
-			sb.Append(version.ReleaseDate.HasValue
-				? $"[{version.Name}] - {version.ReleaseDate:yyyy-MM-dd}"
-				: "[Unreleased]");
+			if (includeHeader)
+			{
+				sb.Append("## ");
+				sb.Append(version.ReleaseDate.HasValue
+					? $"[{version.Name}] - {version.ReleaseDate:yyyy-MM-dd}"
+					: "[Unreleased]");
 
-			if (version.Yanked)
-				sb.Append(" [YANKED]");
+				if (version.Yanked)
+					sb.Append(" [YANKED]");
 
-			sb.AppendLine();
+				sb.AppendLine();
+			}
 
 			WriteChanges(sb, Section.Added, version.Added);
 			WriteChanges(sb, Section.Changed, version.Changed);

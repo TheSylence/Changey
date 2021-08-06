@@ -103,6 +103,26 @@ namespace Changey.Tests.Services
 		}
 
 		[Fact]
+		public async Task DeserializeShouldHandleInvalidVersions()
+		{
+			// Arrange
+			var sb = GenerateChangeLogHeader();
+			sb.AppendLine("## 1.a.0");
+
+			var fileAccess = Substitute.For<IFileAccess>();
+			const string fileName = "path";
+			fileAccess.ReadFromFile(fileName).Returns(Task.FromResult(sb.ToString()));
+
+			var sut = new ChangeLogSerializer(fileAccess);
+
+			// Act
+			var actual = await sut.Deserialize(fileName);
+
+			// Assert
+			Assert.Empty(actual.Versions);
+		}
+
+		[Fact]
 		public async Task DeserializeShouldHandleUnreleasedVersion()
 		{
 			// Arrange
@@ -727,6 +747,42 @@ namespace Changey.Tests.Services
 			var actual = fileAccess.ContentWritten;
 			Assert.NotEmpty(actual);
 			Assert.DoesNotContain("semver.org", actual);
+		}
+
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public async Task SerializeShoulOnlydIncludeHeaderIfSpecified(bool header)
+		{
+			// Arrange
+			var version = new Version
+			{
+				Name = "1.2.3",
+				ReleaseDate = new DateTime(2021, 2, 3),
+				Added = new List<Change>
+				{
+					new() {Text = "Add Message"}
+				},
+				Fixed = new List<Change>
+				{
+					new() {Text = "Fix Message"}
+				}
+			};
+
+			var fileAccess = new MockFileAccess();
+			var sut = new ChangeLogSerializer(fileAccess);
+
+			// Act
+			await sut.Serialize(version, "", header);
+
+			// Assert
+			var lines = fileAccess.ContentWritten.Split(Environment.NewLine);
+			Assert.Contains(lines, l => l.Contains("Add Message"));
+			Assert.Contains(lines, l => l.Contains("Fix Message"));
+			if (header)
+				Assert.Contains(lines, l => l.Contains("1.2.3"));
+			else
+				Assert.DoesNotContain(lines, l => l.Contains("1.2.3"));
 		}
 
 		[Fact]
