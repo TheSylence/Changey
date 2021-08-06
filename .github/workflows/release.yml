@@ -34,9 +34,6 @@ jobs:
     - name: Push nuget package
       run: dotnet nuget push ./Changey/nupkg/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_KEY }} --no-symbols true -s https://api.nuget.org/v3/index.json
       
-    - name: Prepare changelog
-      run: dotnet Changey/bin/Release/netcoreapp5.0/Changey.dll release ${{ steps.tagName.outputs.tag }}
-      
     - name: Extract changelog
       run: dotnet Changey/bin/Release/netcoreapp5.0/Changey.dll extract ${{ steps.tagName.outputs.tag }} -t Changey/nupkg/changelog.md
       
