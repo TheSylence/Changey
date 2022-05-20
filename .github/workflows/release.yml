@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
 
-    - name: Install .NET 5.0
-      uses: actions/setup-dotnet@v1
+    - name: Install .NET
+      uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '6.0.x'
 
     - name: Extract version from tag name
       uses: olegtarasov/get-tag@v2.1
@@ -35,7 +35,7 @@ jobs:
       run: dotnet nuget push ./Changey/nupkg/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_KEY }} --no-symbols true -s https://api.nuget.org/v3/index.json
       
     - name: Extract changelog
-      run: dotnet Changey/bin/Release/netcoreapp5.0/Changey.dll extract ${{ steps.tagName.outputs.tag }} -t Changey/nupkg/changelog.md
+      run: dotnet Changey/bin/Release/net6.0/Changey.dll extract ${{ steps.tagName.outputs.tag }} -t Changey/nupkg/changelog.md
       
     - name: Create github release
       uses: ncipollo/release-action@v1

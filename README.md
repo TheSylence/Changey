@@ -80,4 +80,4 @@ Specify the `-h` flag if you want to include the name and release date of the ve
 
 ## Build from source
 
-You can either use `dotnet build` (.NET 5.0 SDK required) to build the sources or use Visual Studio 2019 16.8 or later (or Rider 2021.2 or later) and open the Changey.sln file.
+You can either use `dotnet build` (.NET 6.0 SDK required) to build the sources or use Visual Studio 2022 or later (or Rider 2022.1 or later) and open the Changey.sln file.
