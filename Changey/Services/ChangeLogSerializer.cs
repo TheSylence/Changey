@@ -12,296 +12,353 @@ namespace Changey.Services;
 
 internal class ChangeLogSerializer : IChangeLogSerializer
 {
-	public ChangeLogSerializer(IFileAccess fileAccess)
-	{
-		_fileAccess = fileAccess;
-	}
+    public ChangeLogSerializer(IFileAccess fileAccess)
+    {
+        _fileAccess = fileAccess;
+    }
 
-	public async Task<ChangeLog> Deserialize(string path)
-	{
-		var content = await _fileAccess.ReadFromFile(path);
+    public async Task<ChangeLog> Deserialize(string path)
+    {
+        var content = await _fileAccess.ReadFromFile(path);
 
-		var changeLog = new ChangeLog();
+        var changeLog = new ChangeLog();
 
-		var lines = content.Split(Environment.NewLine);
-		var offset = FindHeader(lines);
-		if (offset < 0)
-			return changeLog;
+        var lines = content.Split(Environment.NewLine);
+        var offset = FindHeader(lines);
+        if (offset < 0)
+            return changeLog;
 
-		offset = ParseHeader(lines, offset, changeLog);
-		if (offset < 0)
-			return changeLog;
+        offset = ParseHeader(lines, offset, changeLog);
+        if (offset < 0)
+            return changeLog;
 
-		ParseVersions(lines, offset, changeLog);
+        offset = ParseVersions(lines, offset, changeLog);
+        if (offset < 0)
+            return changeLog;
 
-		return changeLog;
-	}
+        ParseCompareLinks(lines, offset, changeLog);
 
-	public async Task Serialize(ChangeLog changeLog, string path)
-	{
-		var content = Serialize(changeLog);
-		await _fileAccess.WriteToFile(path, content);
-	}
+        return changeLog;
+    }
 
-	public async Task Serialize(Version version, string path, bool header)
-	{
-		var sb = new StringBuilder();
-		WriteVersion(sb, version, header);
-		await _fileAccess.WriteToFile(path, sb.ToString());
-	}
+    public async Task Serialize(ChangeLog changeLog, string path)
+    {
+        var content = Serialize(changeLog);
+        await _fileAccess.WriteToFile(path, content);
+    }
 
-	private static void AddChange(Version version, string sectionName, string changeText)
-	{
-		var listToAdd = sectionName switch
-		{
-			AddedSection => version.Added,
-			ChangedSection => version.Changed,
-			DeprecatedSection => version.Deprecated,
-			FixedSection => version.Fixed,
-			RemovedSection => version.Removed,
-			SecuritySection => version.Security,
-			_ => null
-		};
+    public async Task Serialize(Version version, string path, bool header)
+    {
+        var sb = new StringBuilder();
+        WriteVersion(sb, version, header);
+        await _fileAccess.WriteToFile(path, sb.ToString());
+    }
 
-		listToAdd?.Add(new Change {Text = changeText});
-	}
+    private static void AddChange(Version version, string sectionName, string changeText)
+    {
+        var listToAdd = sectionName switch
+        {
+            AddedSection => version.Added,
+            ChangedSection => version.Changed,
+            DeprecatedSection => version.Deprecated,
+            FixedSection => version.Fixed,
+            RemovedSection => version.Removed,
+            SecuritySection => version.Security,
+            _ => null
+        };
 
-	private static int FindHeader(IList<string> lines)
-	{
-		for (var i = 0; i < lines.Count; ++i)
-		{
-			if (lines[i].StartsWith("# Changelog"))
-				return i;
-		}
+        listToAdd?.Add(new Change { Text = changeText });
+    }
 
-		return -1;
-	}
+    private static int FindHeader(IList<string> lines)
+    {
+        for (var i = 0; i < lines.Count; ++i)
+        {
+            if (lines[i].StartsWith("# Changelog"))
+                return i;
+        }
 
-	private static int FindNextChangeSection(IList<string> lines, int offset, int nextVersionOffset)
-	{
-		for (var i = offset; i < nextVersionOffset; ++i)
-		{
-			if (lines[i].StartsWith("### "))
-				return i;
-		}
+        return -1;
+    }
 
-		return -1;
-	}
+    private static int FindNextChangeSection(IList<string> lines, int offset, int nextVersionOffset)
+    {
+        for (var i = offset; i < nextVersionOffset; ++i)
+        {
+            if (lines[i].StartsWith("### "))
+                return i;
+        }
 
-	private static int FindVersion(IList<string> lines, int offset)
-	{
-		for (var i = offset; i < lines.Count; ++i)
-		{
-			if (lines[i].StartsWith("## "))
-				return i;
-		}
+        return -1;
+    }
 
-		return -1;
-	}
+    private static int FindVersion(IList<string> lines, int offset)
+    {
+        for (var i = offset; i < lines.Count; ++i)
+        {
+            if (lines[i].StartsWith("## "))
+                return i;
+        }
 
-	private static int ParseHeader(IList<string> lines, int offset, ChangeLog changeLog)
-	{
-		var keepAChangeLogLine = lines[offset + 3];
+        return -1;
+    }
 
-		if (!keepAChangeLogLine.Contains("keepachangelog.com"))
-			return -1;
+    private static void ParseCompareLink(string line, ChangeLog changeLog)
+    {
+        var parts = line.Split(':', 2);
+        if (parts.Length != 2)
+            return;
 
-		offset += 4;
-		var semVerLine = lines[offset];
-		if (string.IsNullOrEmpty(semVerLine))
-			return offset;
+        var versionName = parts[0].Trim('[', ']');
+        var version = changeLog.Versions.FirstOrDefault(v => v.Name == versionName);
+        if (version != null)
+            version.CompareUrl = parts[1].Trim();
+    }
 
-		if (semVerLine.Contains("semver.org"))
-			changeLog.UsesSemVer = true;
+    private static void ParseCompareLinks(IList<string> lines, int offset, ChangeLog changeLog)
+    {
+        for (var i = offset; i < lines.Count; ++i)
+        {
+            ParseCompareLink(lines[i], changeLog);
+        }
+    }
 
-		offset++;
-		return offset;
-	}
+    private static int ParseHeader(IList<string> lines, int offset, ChangeLog changeLog)
+    {
+        var keepAChangeLogLine = lines[offset + 3];
 
-	private static int ParseSection(IList<string> lines, int offset, Version version)
-	{
-		var sb = new StringBuilder();
-		var sectionName = lines[offset].TrimStart('#').Trim();
+        if (!keepAChangeLogLine.Contains("keepachangelog.com"))
+            return -1;
 
-		for (var i = offset + 1; i < lines.Count; ++i)
-		{
-			if (string.IsNullOrWhiteSpace(lines[i]))
-			{
-				if (sb.Length > 0)
-				{
-					AddChange(version, sectionName, sb.ToString());
-					sb.Clear();
-				}
+        offset += 4;
+        var semVerLine = lines[offset];
+        if (string.IsNullOrEmpty(semVerLine))
+            return offset;
 
-				return i;
-			}
+        if (semVerLine.Contains("semver.org"))
+            changeLog.UsesSemVer = true;
 
-			if (lines[i].StartsWith('-'))
-			{
-				if (sb.Length > 0)
-				{
-					AddChange(version, sectionName, sb.ToString());
-					sb.Clear();
-				}
+        offset++;
+        return offset;
+    }
 
-				sb.Append(lines[i].TrimStart('-').Trim());
-			}
-			else if (lines[i].StartsWith("  "))
-			{
-				sb.AppendLine();
-				sb.Append(lines[i].TrimStart('-').Trim());
-			}
-		}
+    private static int ParseSection(IList<string> lines, int offset, Version version)
+    {
+        var sb = new StringBuilder();
+        var sectionName = lines[offset].TrimStart('#').Trim();
 
-		return -1;
-	}
+        for (var i = offset + 1; i < lines.Count; ++i)
+        {
+            if (string.IsNullOrWhiteSpace(lines[i]))
+            {
+                if (sb.Length > 0)
+                {
+                    AddChange(version, sectionName, sb.ToString());
+                    sb.Clear();
+                }
 
-	private static int ParseVersion(IList<string> lines, int offset, ChangeLog changeLog)
-	{
-		offset = FindVersion(lines, offset);
-		if (offset < 0)
-			return offset;
+                return i;
+            }
 
-		var match = VersionPattern.Match(lines[offset]);
-		if (!match.Success)
-			return offset;
+            if (lines[i].StartsWith('-'))
+            {
+                if (sb.Length > 0)
+                {
+                    AddChange(version, sectionName, sb.ToString());
+                    sb.Clear();
+                }
 
-		var version = new Version
-		{
-			Name = match.Groups[1].Value
-		};
+                sb.Append(lines[i].TrimStart('-').Trim());
+            }
+            else if (lines[i].StartsWith("  "))
+            {
+                sb.AppendLine();
+                sb.Append(lines[i].TrimStart('-').Trim());
+            }
+        }
 
-		if (!string.IsNullOrEmpty(match.Groups[2].Value))
-		{
-			version.ReleaseDate =
-				DateTime.ParseExact(match.Groups[2].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-		}
+        return -1;
+    }
 
-		if (!string.IsNullOrEmpty(match.Groups[3].Value))
-			version.Yanked = true;
+    private static int ParseVersion(IList<string> lines, int offset, ChangeLog changeLog)
+    {
+        offset = FindVersion(lines, offset);
+        if (offset < 0)
+            return offset;
 
-		changeLog.Versions.Add(version);
+        var match = VersionPattern.Match(lines[offset]);
+        if (!match.Success)
+            return offset;
 
-		var nextVersionOffset = FindVersion(lines, offset + 1);
-		nextVersionOffset = nextVersionOffset < 0 ? lines.Count : nextVersionOffset;
+        var version = new Version
+        {
+            Name = match.Groups[1].Value
+        };
 
-		var nextSectionOffset = offset;
-		while ((nextSectionOffset = FindNextChangeSection(lines, nextSectionOffset, nextVersionOffset)) >= 0)
-		{
-			nextSectionOffset = ParseSection(lines, nextSectionOffset, version);
-			if (nextSectionOffset < 0)
-				break;
-		}
+        if (!string.IsNullOrEmpty(match.Groups[2].Value))
+        {
+            version.ReleaseDate =
+                DateTime.ParseExact(match.Groups[2].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        }
 
-		offset = nextVersionOffset - 1;
+        if (!string.IsNullOrEmpty(match.Groups[3].Value))
+            version.Yanked = true;
 
-		return offset;
-	}
+        changeLog.Versions.Add(version);
 
-	private static void ParseVersions(IList<string> lines, int offset, ChangeLog changeLog)
-	{
-		for (var i = offset; i < lines.Count; ++i)
-		{
-			var newOffset = ParseVersion(lines, i, changeLog);
-			if (newOffset < 0)
-				break;
+        var nextVersionOffset = FindVersion(lines, offset + 1);
+        var compareLinksStart = FindCompareLinks(lines, offset + 1);
+        nextVersionOffset = nextVersionOffset < 0 
+            ? compareLinksStart < 0 
+                ? lines.Count 
+                : compareLinksStart 
+            : nextVersionOffset;
 
-			i = newOffset;
-		}
-	}
+        var nextSectionOffset = offset;
+        while ((nextSectionOffset = FindNextChangeSection(lines, nextSectionOffset, nextVersionOffset)) >= 0)
+        {
+            nextSectionOffset = ParseSection(lines, nextSectionOffset, version);
+            if (nextSectionOffset < 0)
+                break;
+        }
 
-	private static string Serialize(ChangeLog changeLog)
-	{
-		var sb = new StringBuilder();
+        offset = nextVersionOffset - 1;
 
-		WriteHeader(changeLog, sb);
+        return offset;
+    }
 
-		foreach (var version in changeLog.Versions.OrderByDescending(v => v.ReleaseDate ?? DateTime.MaxValue))
-		{
-			WriteVersion(sb, version, true);
-		}
+    private static int FindCompareLinks(IList<string> lines, int offset)
+    {
+        for (var i = offset; i < lines.Count; ++i)
+        {
+            if (lines[i].StartsWith('['))
+                return i;
+        }
 
-		return sb.ToString();
-	}
+        return -1;
+    }
 
-	private static string TitleForSection(Section section)
-	{
-		return section switch
-		{
-			Section.Added => AddedSection,
-			Section.Changed => ChangedSection,
-			Section.Deprecated => DeprecatedSection,
-			Section.Fixed => FixedSection,
-			Section.Removed => RemovedSection,
-			Section.Security => SecuritySection,
-			_ => string.Empty
-		};
-	}
+    private static int ParseVersions(IList<string> lines, int offset, ChangeLog changeLog)
+    {
+        var nextOffset = offset;
+        for (var i = offset; i < lines.Count; ++i)
+        {
+            var newOffset = ParseVersion(lines, i, changeLog);
+            if (newOffset < 0)
+                break;
 
-	private static void WriteChanges(StringBuilder sb, Section section, IList<Change> changes)
-	{
-		if (!changes.Any())
-			return;
+            i = newOffset;
+            nextOffset = newOffset;
+        }
 
-		var title = TitleForSection(section);
-		sb.AppendLine($"### {title}");
-		foreach (var change in changes)
-		{
-			sb.AppendLine($"- {change.Text}");
-		}
+        return nextOffset;
+    }
 
-		sb.AppendLine();
-	}
+    private static string Serialize(ChangeLog changeLog)
+    {
+        var sb = new StringBuilder();
 
-	private static void WriteHeader(ChangeLog changeLog, StringBuilder sb)
-	{
-		sb.AppendLine("# Changelog");
-		sb.AppendLine("All notable changes to this project will be documented in this file.");
-		sb.AppendLine();
-		sb.Append("The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)");
-		if (changeLog.UsesSemVer)
-		{
-			sb.AppendLine(",");
-			sb.AppendLine("and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).");
-		}
-		else
-			sb.AppendLine(".");
+        WriteHeader(changeLog, sb);
 
-		sb.AppendLine();
-	}
+        var versions = changeLog.Versions.OrderByDescending(v => v.ReleaseDate ?? DateTime.MaxValue).ToList();
+        foreach (var version in versions)
+        {
+            WriteVersion(sb, version, true);
+        }
 
-	private static void WriteVersion(StringBuilder sb, Version version, bool includeHeader)
-	{
-		if (includeHeader)
-		{
-			sb.Append("## ");
-			sb.Append(version.ReleaseDate.HasValue
-				? $"[{version.Name}] - {version.ReleaseDate:yyyy-MM-dd}"
-				: "[Unreleased]");
+        sb.AppendLine();
+        foreach (var version in versions)
+        {
+            WriteCompareLink(sb, version);
+        }
 
-			if (version.Yanked)
-				sb.Append(" [YANKED]");
+        return sb.ToString();
+    }
 
-			sb.AppendLine();
-		}
+    private static string TitleForSection(Section section)
+    {
+        return section switch
+        {
+            Section.Added => AddedSection,
+            Section.Changed => ChangedSection,
+            Section.Deprecated => DeprecatedSection,
+            Section.Fixed => FixedSection,
+            Section.Removed => RemovedSection,
+            Section.Security => SecuritySection,
+            _ => string.Empty
+        };
+    }
 
-		WriteChanges(sb, Section.Added, version.Added);
-		WriteChanges(sb, Section.Changed, version.Changed);
-		WriteChanges(sb, Section.Deprecated, version.Deprecated);
-		WriteChanges(sb, Section.Removed, version.Removed);
-		WriteChanges(sb, Section.Fixed, version.Fixed);
-		WriteChanges(sb, Section.Security, version.Security);
-	}
+    private static void WriteChanges(StringBuilder sb, Section section, IList<Change> changes)
+    {
+        if (!changes.Any())
+            return;
 
-	private readonly IFileAccess _fileAccess;
+        var title = TitleForSection(section);
+        sb.AppendLine($"### {title}");
+        foreach (var change in changes)
+        {
+            sb.AppendLine($"- {change.Text}");
+        }
 
-	private const string AddedSection = "Added";
-	private const string ChangedSection = "Changed";
-	private const string DeprecatedSection = "Deprecated";
-	private const string FixedSection = "Fixed";
-	private const string RemovedSection = "Removed";
-	private const string SecuritySection = "Security";
+        sb.AppendLine();
+    }
 
-	private static readonly Regex VersionPattern =
-		new("\\[([\\w\\.]+)\\](?: - (\\d{4}-\\d{2}-\\d{2})( \\[YANKED\\])?)?", RegexOptions.Compiled);
+    private static void WriteCompareLink(StringBuilder sb, Version version)
+    {
+        if (!string.IsNullOrEmpty(version.CompareUrl))
+            sb.AppendLine($"[{version.Name}]: {version.CompareUrl}");
+    }
+
+    private static void WriteHeader(ChangeLog changeLog, StringBuilder sb)
+    {
+        sb.AppendLine("# Changelog");
+        sb.AppendLine("All notable changes to this project will be documented in this file.");
+        sb.AppendLine();
+        sb.Append("The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)");
+        if (changeLog.UsesSemVer)
+        {
+            sb.AppendLine(",");
+            sb.AppendLine("and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).");
+        }
+        else
+            sb.AppendLine(".");
+
+        sb.AppendLine();
+    }
+
+    private static void WriteVersion(StringBuilder sb, Version version, bool includeHeader)
+    {
+        if (includeHeader)
+        {
+            sb.Append("## ");
+            sb.Append(version.ReleaseDate.HasValue
+                ? $"[{version.Name}] - {version.ReleaseDate:yyyy-MM-dd}"
+                : "[Unreleased]");
+
+            if (version.Yanked)
+                sb.Append(" [YANKED]");
+
+            sb.AppendLine();
+        }
+
+        WriteChanges(sb, Section.Added, version.Added);
+        WriteChanges(sb, Section.Changed, version.Changed);
+        WriteChanges(sb, Section.Deprecated, version.Deprecated);
+        WriteChanges(sb, Section.Removed, version.Removed);
+        WriteChanges(sb, Section.Fixed, version.Fixed);
+        WriteChanges(sb, Section.Security, version.Security);
+    }
+
+    private readonly IFileAccess _fileAccess;
+
+    private const string AddedSection = "Added";
+    private const string ChangedSection = "Changed";
+    private const string DeprecatedSection = "Deprecated";
+    private const string FixedSection = "Fixed";
+    private const string RemovedSection = "Removed";
+    private const string SecuritySection = "Security";
+
+    private static readonly Regex VersionPattern =
+        new("\\[([\\w\\.]+)\\](?: - (\\d{4}-\\d{2}-\\d{2})( \\[YANKED\\])?)?", RegexOptions.Compiled);
 }
