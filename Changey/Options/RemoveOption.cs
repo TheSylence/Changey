@@ -4,20 +4,19 @@ using CommandLine;
 using CommandLine.Text;
 using JetBrains.Annotations;
 
-namespace Changey.Options
+namespace Changey.Options;
+
+[Verb("remove", HelpText = "Adds a new change to the 'Removed' section of the current unreleased version")]
+internal class RemoveOption : SectionOption
 {
-	[Verb("remove", HelpText = "Adds a new change to the 'Removed' section of the current unreleased version")]
-	internal class RemoveOption : SectionOption
+	public RemoveOption(string message, string path, bool silent, bool verbose)
+		: base(message, path, silent, verbose)
 	{
-		public RemoveOption(string message, string path, bool silent, bool verbose)
-			: base(message, path, silent, verbose)
-		{
-		}
-
-		[Usage(ApplicationAlias = "changey")]
-		[UsedImplicitly]
-		public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<RemoveOption>();
-
-		internal override Section Section => Section.Removed;
 	}
+
+	[Usage(ApplicationAlias = "changey")]
+	[UsedImplicitly]
+	public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<RemoveOption>();
+
+	internal override Section Section => Section.Removed;
 }

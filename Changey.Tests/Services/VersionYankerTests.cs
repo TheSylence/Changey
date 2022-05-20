@@ -8,111 +8,110 @@ using NSubstitute;
 using Xunit;
 using Version = Changey.Models.Version;
 
-namespace Changey.Tests.Services
+namespace Changey.Tests.Services;
+
+public class VersionYankerTests
 {
-	public class VersionYankerTests
+	[Fact]
+	public async Task YankShouldLogErrorWhenNoReleasedVersionIsFound()
 	{
-		[Fact]
-		public async Task YankShouldLogErrorWhenNoReleasedVersionIsFound()
+		// Arrange
+		var changeLog = new ChangeLog
 		{
-			// Arrange
-			var changeLog = new ChangeLog
+			Versions = new List<Version>
 			{
-				Versions = new List<Version>
-				{
-					new()
-				}
-			};
+				new()
+			}
+		};
 
-			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-			changeLogSerializer.Deserialize("").Returns(Task.FromResult(changeLog));
+		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+		changeLogSerializer.Deserialize("").Returns(Task.FromResult(changeLog));
 
-			var logger = Substitute.For<ILogger>();
-			var sut = new VersionYanker(logger, changeLogSerializer);
+		var logger = Substitute.For<ILogger>();
+		var sut = new VersionYanker(logger, changeLogSerializer);
 
-			// Act
-			var actual = await sut.Yank("");
+		// Act
+		var actual = await sut.Yank("");
 
-			// Assert
-			Assert.False(actual);
-			logger.Received(1).Error(Arg.Any<string>());
-		}
+		// Assert
+		Assert.False(actual);
+		logger.Received(1).Error(Arg.Any<string>());
+	}
 
-		[Fact]
-		public async Task YankShouldNotThrowsWhenSerializerThrowsDuringSerialization()
+	[Fact]
+	public async Task YankShouldNotThrowsWhenSerializerThrowsDuringSerialization()
+	{
+		// Arrange
+		var changeLog = new ChangeLog
 		{
-			// Arrange
-			var changeLog = new ChangeLog
+			Versions = new List<Version>
 			{
-				Versions = new List<Version>
+				new()
 				{
-					new()
-					{
-						ReleaseDate = DateTime.Now
-					}
+					ReleaseDate = DateTime.Now
 				}
-			};
+			}
+		};
 
-			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-			changeLogSerializer.Deserialize("").Returns(Task.FromResult(changeLog));
-			changeLogSerializer.Serialize(Arg.Any<ChangeLog>(), "")
-				.Returns(Task.FromException(new Exception("test-exception")));
+		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+		changeLogSerializer.Deserialize("").Returns(Task.FromResult(changeLog));
+		changeLogSerializer.Serialize(Arg.Any<ChangeLog>(), "")
+			.Returns(Task.FromException(new Exception("test-exception")));
 
-			var logger = Substitute.For<ILogger>();
-			var sut = new VersionYanker(logger, changeLogSerializer);
+		var logger = Substitute.For<ILogger>();
+		var sut = new VersionYanker(logger, changeLogSerializer);
 
-			// Act
-			var ex = await Record.ExceptionAsync(async () => await sut.Yank(""));
+		// Act
+		var ex = await Record.ExceptionAsync(async () => await sut.Yank(""));
 
-			// Assert
-			Assert.Null(ex);
-		}
+		// Assert
+		Assert.Null(ex);
+	}
 
-		[Fact]
-		public async Task YankShouldNotThrowWhenSerializerThrowsDuringDeserialization()
+	[Fact]
+	public async Task YankShouldNotThrowWhenSerializerThrowsDuringDeserialization()
+	{
+		// Arrange
+		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+		changeLogSerializer.Deserialize("")
+			.Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
+
+		var logger = Substitute.For<ILogger>();
+		var sut = new VersionYanker(logger, changeLogSerializer);
+
+		// Act
+		var ex = await Record.ExceptionAsync(async () => await sut.Yank(""));
+
+		// Assert
+		Assert.Null(ex);
+	}
+
+	[Fact]
+	public async Task YankShouldYankVersion()
+	{
+		// Arrange
+		var changeLog = new ChangeLog
 		{
-			// Arrange
-			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-			changeLogSerializer.Deserialize("")
-				.Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
-
-			var logger = Substitute.For<ILogger>();
-			var sut = new VersionYanker(logger, changeLogSerializer);
-
-			// Act
-			var ex = await Record.ExceptionAsync(async () => await sut.Yank(""));
-
-			// Assert
-			Assert.Null(ex);
-		}
-
-		[Fact]
-		public async Task YankShouldYankVersion()
-		{
-			// Arrange
-			var changeLog = new ChangeLog
+			Versions = new List<Version>
 			{
-				Versions = new List<Version>
+				new()
 				{
-					new()
-					{
-						ReleaseDate = DateTime.Now
-					}
+					ReleaseDate = DateTime.Now
 				}
-			};
+			}
+		};
 
-			var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-			changeLogSerializer.Deserialize("").Returns(Task.FromResult(changeLog));
+		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+		changeLogSerializer.Deserialize("").Returns(Task.FromResult(changeLog));
 
-			var logger = Substitute.For<ILogger>();
-			var sut = new VersionYanker(logger, changeLogSerializer);
+		var logger = Substitute.For<ILogger>();
+		var sut = new VersionYanker(logger, changeLogSerializer);
 
-			// Act
-			var actual = await sut.Yank("");
+		// Act
+		var actual = await sut.Yank("");
 
-			// Assert
-			Assert.True(actual);
-			await changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(c => c.Versions.First().Yanked), "");
-		}
+		// Assert
+		Assert.True(actual);
+		await changeLogSerializer.Received(1).Serialize(Arg.Is<ChangeLog>(c => c.Versions.First().Yanked), "");
 	}
 }

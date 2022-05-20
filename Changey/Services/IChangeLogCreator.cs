@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Changey.Services
+namespace Changey.Services;
+
+internal interface IChangeLogCreator
 {
-	internal interface IChangeLogCreator
-	{
-		Task CreateChangelog(string path, bool usesSemver, bool overwrite);
-	}
+	Task CreateChangelog(string path, bool usesSemver, bool overwrite);
 }

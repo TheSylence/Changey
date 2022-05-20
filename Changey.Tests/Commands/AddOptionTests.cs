@@ -6,25 +6,24 @@ using Changey.Services;
 using NSubstitute;
 using Xunit;
 
-namespace Changey.Tests.Commands
+namespace Changey.Tests.Commands;
+
+public class AddCommandTests
 {
-	public class AddCommandTests
+	[Fact]
+	public async Task ExecuteShouldCallSectionAdder()
 	{
-		[Fact]
-		public async Task ExecuteShouldCallSectionAdder()
-		{
-			// Arrange
-			var sectionAdder = Substitute.For<ISectionAdder>();
-			const string fileName = "path";
-			const string message = "the-message";
-			var option = new AddOption(message, fileName, false, false);
-			var sut = new SectionCommand(option, sectionAdder);
+		// Arrange
+		var sectionAdder = Substitute.For<ISectionAdder>();
+		const string fileName = "path";
+		const string message = "the-message";
+		var option = new AddOption(message, fileName, false, false);
+		var sut = new SectionCommand(option, sectionAdder);
 
-			// Act
-			await sut.Execute();
+		// Act
+		await sut.Execute();
 
-			// Assert
-			await sectionAdder.Received(1).AddToSection(fileName, Section.Added, message);
-		}
+		// Assert
+		await sectionAdder.Received(1).AddToSection(fileName, Section.Added, message);
 	}
 }

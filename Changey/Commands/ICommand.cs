@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Changey.Commands
+namespace Changey.Commands;
+
+internal interface ICommand
 {
-	internal interface ICommand
-	{
-		Task Execute();
-	}
+	Task Execute();
 }

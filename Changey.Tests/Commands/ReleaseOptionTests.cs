@@ -6,69 +6,68 @@ using Changey.Services;
 using NSubstitute;
 using Xunit;
 
-namespace Changey.Tests.Commands
+namespace Changey.Tests.Commands;
+
+public class ReleaseCommandTests
 {
-	public class ReleaseCommandTests
+	[Fact]
+	public async Task ExecuteShouldCallChangeLogReleaser()
 	{
-		[Fact]
-		public async Task ExecuteShouldCallChangeLogReleaser()
-		{
-			// Arrange
-			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
-			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
-				.Returns(Task.FromResult(true));
-			var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
-			var sut = new ReleaseCommand(option, changeLogReleaser);
+		// Arrange
+		var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
+		changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
+			.Returns(Task.FromResult(true));
+		var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
+		var sut = new ReleaseCommand(option, changeLogReleaser);
 
-			// Act
-			await sut.Execute();
+		// Act
+		await sut.Execute();
 
-			// Assert
-			await changeLogReleaser.Received(1).Release("file.name", null, "1.2.3", false);
-		}
+		// Assert
+		await changeLogReleaser.Received(1).Release("file.name", null, "1.2.3", false);
+	}
 
-		[Fact]
-		public async Task ExecuteShouldLogWhenReleaseFails()
-		{
-			// Arrange
-			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
-			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
-				.Returns(Task.FromResult(false));
+	[Fact]
+	public async Task ExecuteShouldLogWhenReleaseFails()
+	{
+		// Arrange
+		var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
+		changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
+			.Returns(Task.FromResult(false));
 
-			var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
+		var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
 
-			var logger = Substitute.For<ILogger>();
-			option.InjectLogger(logger);
+		var logger = Substitute.For<ILogger>();
+		option.InjectLogger(logger);
 
-			var sut = new ReleaseCommand(option, changeLogReleaser);
+		var sut = new ReleaseCommand(option, changeLogReleaser);
 
-			// Act
-			await sut.Execute();
+		// Act
+		await sut.Execute();
 
-			// Assert
-			logger.Received(1).Warning(Arg.Any<string>());
-		}
+		// Assert
+		logger.Received(1).Warning(Arg.Any<string>());
+	}
 
-		[Fact]
-		public async Task ExecuteShouldLogWhenReleaseThrows()
-		{
-			// Arrange
-			var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
-			changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
-				.Returns(Task.FromException<bool>(new Exception("test-exception")));
+	[Fact]
+	public async Task ExecuteShouldLogWhenReleaseThrows()
+	{
+		// Arrange
+		var changeLogReleaser = Substitute.For<IChangeLogReleaser>();
+		changeLogReleaser.Release(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>())
+			.Returns(Task.FromException<bool>(new Exception("test-exception")));
 
-			var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
+		var option = new ReleaseOption(null, false, "1.2.3", "file.name", false, false);
 
-			var logger = Substitute.For<ILogger>();
-			option.InjectLogger(logger);
+		var logger = Substitute.For<ILogger>();
+		option.InjectLogger(logger);
 
-			var sut = new ReleaseCommand(option, changeLogReleaser);
+		var sut = new ReleaseCommand(option, changeLogReleaser);
 
-			// Act
-			await sut.Execute();
+		// Act
+		await sut.Execute();
 
-			// Assert
-			logger.Received(1).Error(Arg.Any<string>(), Arg.Is<Exception>(e => e.Message.Contains("test-exception")));
-		}
+		// Assert
+		logger.Received(1).Error(Arg.Any<string>(), Arg.Is<Exception>(e => e.Message.Contains("test-exception")));
 	}
 }

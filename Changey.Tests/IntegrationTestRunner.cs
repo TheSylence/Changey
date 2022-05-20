@@ -5,123 +5,122 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Changey.Tests
+namespace Changey.Tests;
+
+internal class IntegrationTestRunner
 {
-	internal class IntegrationTestRunner
+	public IntegrationTestRunner(Program program, bool autoAppendChangelogPath = true)
 	{
-		public IntegrationTestRunner(Program program, bool autoAppendChangelogPath = true)
+		_program = program;
+		_autoAppendChangelogPath = autoAppendChangelogPath;
+	}
+
+	public void AddPass(string command, Func<string, IEnumerable<string>> validator)
+	{
+		_passes.Add(new IntegrationTestRunPass(command, validator, _autoAppendChangelogPath));
+	}
+
+	public void AddPass(string command, string[] expectedSubstrings, string[] forbiddenSubstrings)
+	{
+		var pass = new IntegrationTestRunPass(command, content =>
 		{
-			_program = program;
-			_autoAppendChangelogPath = autoAppendChangelogPath;
-		}
+			var missingSubstrings = expectedSubstrings
+				.Where(x => !content.Contains(x))
+				.Select(x => $"Missing '{x}' in {content}");
 
-		public void AddPass(string command, Func<string, IEnumerable<string>> validator)
-		{
-			_passes.Add(new IntegrationTestRunPass(command, validator, _autoAppendChangelogPath));
-		}
+			var forbiddenMatches = forbiddenSubstrings.Where(content.Contains)
+				.Select(x => $"Forbidden '{x}' found in {content}");
 
-		public void AddPass(string command, string[] expectedSubstrings, string[] forbiddenSubstrings)
-		{
-			var pass = new IntegrationTestRunPass(command, content =>
-			{
-				var missingSubstrings = expectedSubstrings
-					.Where(x => !content.Contains(x))
-					.Select(x => $"Missing '{x}' in {content}");
-
-				var forbiddenMatches = forbiddenSubstrings.Where(content.Contains)
-					.Select(x => $"Forbidden '{x}' found in {content}");
-
-				var errors = missingSubstrings.Concat(forbiddenMatches).ToList();
-
-				return errors;
-			}, _autoAppendChangelogPath);
-
-			_passes.Add(pass);
-		}
-
-		public async Task<IEnumerable<string>> Run(string changeLogPath)
-		{
-			File.Delete(changeLogPath);
-			var errors = new List<string>();
-
-			foreach (var pass in _passes)
-			{
-				await pass.Execute(_program, changeLogPath);
-
-				var content = await File.ReadAllTextAsync(changeLogPath);
-
-				errors.AddRange(pass.Validate(content));
-			}
+			var errors = missingSubstrings.Concat(forbiddenMatches).ToList();
 
 			return errors;
+		}, _autoAppendChangelogPath);
+
+		_passes.Add(pass);
+	}
+
+	public async Task<IEnumerable<string>> Run(string changeLogPath)
+	{
+		File.Delete(changeLogPath);
+		var errors = new List<string>();
+
+		foreach (var pass in _passes)
+		{
+			await pass.Execute(_program, changeLogPath);
+
+			var content = await File.ReadAllTextAsync(changeLogPath);
+
+			errors.AddRange(pass.Validate(content));
 		}
 
-		private readonly List<IntegrationTestRunPass> _passes = new();
-		private readonly Program _program;
-		private readonly bool _autoAppendChangelogPath;
+		return errors;
+	}
 
-		private class IntegrationTestRunPass
+	private readonly List<IntegrationTestRunPass> _passes = new();
+	private readonly Program _program;
+	private readonly bool _autoAppendChangelogPath;
+
+	private class IntegrationTestRunPass
+	{
+		public IntegrationTestRunPass(string command, Func<string, IEnumerable<string>> validator, bool autoAppendChangelogPath)
 		{
-			public IntegrationTestRunPass(string command, Func<string, IEnumerable<string>> validator, bool autoAppendChangelogPath)
+			_command = AppendChangeLogPath(command, autoAppendChangelogPath);
+			_validator = validator;
+		}
+
+		public async Task Execute(Program program, string changeLogPath)
+		{
+			var args = SplitCommandArgs(changeLogPath);
+			await program.Run(args);
+		}
+
+		public IEnumerable<string> Validate(string content) => _validator(content);
+
+		private string AppendChangeLogPath(string command, bool append)
+		{
+			if (!append)
+				return command;
+
+			return command + " -p %changelogpath%";
+		}
+
+		private IEnumerable<string> SplitCommandArgs(string changeLogPath)
+		{
+			var command = _command.Replace("%changelogpath%", changeLogPath);
+
+			var parts = command.Split(' ');
+			var sb = new StringBuilder();
+			var inQuotes = false;
+
+			foreach (var part in parts)
 			{
-				_command = AppendChangeLogPath(command, autoAppendChangelogPath);
-				_validator = validator;
-			}
-
-			public async Task Execute(Program program, string changeLogPath)
-			{
-				var args = SplitCommandArgs(changeLogPath);
-				await program.Run(args);
-			}
-
-			public IEnumerable<string> Validate(string content) => _validator(content);
-
-			private string AppendChangeLogPath(string command, bool append)
-			{
-				if (!append)
-					return command;
-
-				return command + " -p %changelogpath%";
-			}
-
-			private IEnumerable<string> SplitCommandArgs(string changeLogPath)
-			{
-				var command = _command.Replace("%changelogpath%", changeLogPath);
-
-				var parts = command.Split(' ');
-				var sb = new StringBuilder();
-				var inQuotes = false;
-
-				foreach (var part in parts)
+				if (part.StartsWith('\"'))
 				{
-					if (part.StartsWith('\"'))
-					{
-						sb.Append(part.Trim('\"'));
-						inQuotes = true;
-					}
-					else if (part.EndsWith('\"'))
+					sb.Append(part.Trim('\"'));
+					inQuotes = true;
+				}
+				else if (part.EndsWith('\"'))
+				{
+					sb.Append(" ");
+					sb.Append(part.Trim('\"'));
+					yield return sb.ToString();
+					sb.Clear();
+					inQuotes = false;
+				}
+				else
+				{
+					if (inQuotes)
 					{
 						sb.Append(" ");
-						sb.Append(part.Trim('\"'));
-						yield return sb.ToString();
-						sb.Clear();
-						inQuotes = false;
+						sb.Append(part);
 					}
 					else
-					{
-						if (inQuotes)
-						{
-							sb.Append(" ");
-							sb.Append(part);
-						}
-						else
-							yield return part;
-					}
+						yield return part;
 				}
 			}
-
-			private readonly string _command;
-			private readonly Func<string, IEnumerable<string>> _validator;
 		}
+
+		private readonly string _command;
+		private readonly Func<string, IEnumerable<string>> _validator;
 	}
 }

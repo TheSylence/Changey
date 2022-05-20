@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Changey.Models;
 
-namespace Changey.Services
+namespace Changey.Services;
+
+internal interface ISectionAdder
 {
-	internal interface ISectionAdder
-	{
-		Task AddToSection(string path, Section section, string message);
-	}
+	Task AddToSection(string path, Section section, string message);
 }

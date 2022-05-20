@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Changey.Services
+namespace Changey.Services;
+
+internal interface IVersionYanker
 {
-	internal interface IVersionYanker
-	{
-		Task<bool> Yank(string path);
-	}
+	Task<bool> Yank(string path);
 }

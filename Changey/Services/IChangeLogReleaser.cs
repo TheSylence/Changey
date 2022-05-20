@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Changey.Services
+namespace Changey.Services;
+
+internal interface IChangeLogReleaser
 {
-	internal interface IChangeLogReleaser
-	{
-		Task<bool> Release(string path, string? date, string version, bool forceRelease);
-	}
+	Task<bool> Release(string path, string? date, string version, bool forceRelease);
 }

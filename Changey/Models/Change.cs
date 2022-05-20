@@ -1,8 +1,7 @@
 ﻿// ReSharper disable PropertyCanBeMadeInitOnly.Global
-namespace Changey.Models
+namespace Changey.Models;
+
+internal class Change
 {
-	internal class Change
-	{
-		public string Text { get; set; } = string.Empty;
-	}
+	public string Text { get; set; } = string.Empty;
 }

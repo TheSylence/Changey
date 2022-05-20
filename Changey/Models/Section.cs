@@ -1,12 +1,11 @@
-﻿namespace Changey.Models
+﻿namespace Changey.Models;
+
+internal enum Section
 {
-	internal enum Section
-	{
-		Added,
-		Changed,
-		Deprecated,
-		Fixed,
-		Removed,
-		Security
-	}
+	Added,
+	Changed,
+	Deprecated,
+	Fixed,
+	Removed,
+	Security
 }

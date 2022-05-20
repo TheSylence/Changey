@@ -4,20 +4,19 @@ using CommandLine;
 using CommandLine.Text;
 using JetBrains.Annotations;
 
-namespace Changey.Options
+namespace Changey.Options;
+
+[Verb("change", HelpText = "Adds a new change to the 'Changed' section of the current unreleased version")]
+internal class ChangeOption : SectionOption
 {
-	[Verb("change", HelpText = "Adds a new change to the 'Changed' section of the current unreleased version")]
-	internal class ChangeOption : SectionOption
+	public ChangeOption(string message, string path, bool silent, bool verbose)
+		: base(message, path, silent, verbose)
 	{
-		public ChangeOption(string message, string path, bool silent, bool verbose)
-			: base(message, path, silent, verbose)
-		{
-		}
-
-		[Usage(ApplicationAlias = "changey")]
-		[UsedImplicitly]
-		public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<ChangeOption>();
-
-		internal override Section Section => Section.Changed;
 	}
+
+	[Usage(ApplicationAlias = "changey")]
+	[UsedImplicitly]
+	public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<ChangeOption>();
+
+	internal override Section Section => Section.Changed;
 }
