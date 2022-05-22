@@ -17,7 +17,8 @@ public class ExtractorTests
 		// Arrange
 		var logger = Substitute.For<ILogger>();
 		var serializer = Substitute.For<IChangeLogSerializer>();
-		serializer.Deserialize(Arg.Any<string>()).Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
+		serializer.Deserialize(Arg.Any<string>())
+			.Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
 
 		var sut = new Extractor(logger, serializer);
 
@@ -46,7 +47,8 @@ public class ExtractorTests
 		};
 
 		serializer.Deserialize(Arg.Any<string>()).Returns(Task.FromResult(changeLog));
-		serializer.Serialize(Arg.Any<Version>(), Arg.Any<string>(), false).Returns(Task.FromException(new Exception("test-exception")));
+		serializer.Serialize(Arg.Any<Version>(), Arg.Any<string>(), false)
+			.Returns(Task.FromException(new Exception("test-exception")));
 
 		var sut = new Extractor(logger, serializer);
 

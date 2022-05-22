@@ -81,7 +81,7 @@ public class SectionAdderTests
 		var sut = new SectionAdder(serializer, logger);
 
 		// Act
-		await sut.AddToSection(fileName, (Section) int.MaxValue, "test");
+		await sut.AddToSection(fileName, (Section)int.MaxValue, "test");
 
 		// Assert
 		logger.Received(1).Error(Arg.Is<string>(x => x.Contains("section")));
@@ -125,7 +125,8 @@ public class SectionAdderTests
 		// Arrange
 		var logger = Substitute.For<ILogger>();
 		var serializer = Substitute.For<IChangeLogSerializer>();
-		serializer.Deserialize(Arg.Any<string>()).Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
+		serializer.Deserialize(Arg.Any<string>())
+			.Returns(Task.FromException<ChangeLog>(new Exception("test-exception")));
 
 		var sut = new SectionAdder(serializer, logger);
 

@@ -19,7 +19,7 @@ internal class ReleaseOption : BaseOption
 	[Option('d', HelpText = "The date to use for this release. If omitted the current date will be used",
 		Default = null)]
 	public string? Date { get; }
-		
+
 	[Option('f', HelpText = "Force release even if version is older than already released versions", Default = false)]
 	public bool Force { get; }
 

@@ -19,14 +19,14 @@ public static class ExceptionExtensions
 			var traceFormatType = typeof(StackTrace).GetNestedType("TraceFormat", BindingFlags.NonPublic);
 			if (traceFormatType == null)
 				return (exception, _) => exception;
-				
+
 			var normalTraceFormat = Enum.GetValues(traceFormatType).GetValue(0);
 
 			var toString = typeof(StackTrace).GetMethod("ToString", BindingFlags.NonPublic | BindingFlags.Instance,
-				null, new[] {traceFormatType}, null);
+				null, new[] { traceFormatType }, null);
 			if (toString == null)
 				return (exception, _) => exception;
-				
+
 			var stackTraceString =
 				Expression.Call(stack, toString, Expression.Constant(normalTraceFormat, traceFormatType));
 			var stackTraceStringField =
@@ -34,7 +34,7 @@ public static class ExceptionExtensions
 
 			if (stackTraceStringField == null)
 				return (exception, _) => exception;
-				
+
 			var assign = Expression.Assign(Expression.Field(target, stackTraceStringField), stackTraceString);
 			return Expression
 				.Lambda<Func<Exception, StackTrace, Exception>>(Expression.Block(assign, target), target, stack)

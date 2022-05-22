@@ -15,7 +15,6 @@ internal class Extractor : IExtractor
 
 	public async Task<bool> Extract(string source, string version, string target, bool header)
 	{
-			
 		ChangeLog changeLog;
 		try
 		{
@@ -46,7 +45,7 @@ internal class Extractor : IExtractor
 
 		return true;
 	}
-		
+
 	private readonly ILogger _logger;
 	private readonly IChangeLogSerializer _changeLogSerializer;
 }

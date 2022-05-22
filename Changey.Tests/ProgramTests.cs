@@ -70,7 +70,7 @@ public class ProgramTests
 		var sut = new Program(null, writer);
 
 		// Act
-		await sut.Run(new[] {"help", command});
+		await sut.Run(new[] { "help", command });
 
 		// Assert
 		var output = writer.ToString();
@@ -85,7 +85,7 @@ public class ProgramTests
 		var sut = new Program(null, writer);
 
 		// Act
-		await sut.Run(new[] {"--help"});
+		await sut.Run(new[] { "--help" });
 
 		// Assert
 		var output = writer.ToString();
@@ -120,7 +120,7 @@ public class ProgramTests
 		await using var writer = new StringWriter();
 		var sut = new Program(null, writer);
 
-		var args = new[] {"help", verb};
+		var args = new[] { "help", verb };
 
 		// Act
 		await sut.Run(args);
