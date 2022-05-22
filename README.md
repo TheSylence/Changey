@@ -71,6 +71,40 @@ Will write all changes for version 1.2.3 from the current changelog to a file ca
 
 Specify the `-h` flag if you want to include the name and release date of the version in the generated file.
 
+### Version links
+
+To allow a user to view (code) changes between different version you can generate compare links for different versions.
+
+`changey compare` will initialize this in an existing changelog and from then on will be used every time a new version is created or released.
+
+You need to specify the base url of your project (`-b BASEURL`), a template for the generation of a URL for listing changes between two versions (`-c TEMPLATE`), and a template for an URL that points to a specific release (`-r TEMPLATE`).
+If your project is hosted on a known platform you can ommit the templates since they will generated based on the base URL.
+"Known platforms" are currently:
+- github.com
+- gitlab.com
+
+So `changey compare github.com/TheSylence/Changey` will setup the changelog to generate URLs that point to comparisions between two versions (e.g. https://github.com/TheSylence/changey/compare/0.2...0.3) and URLs that point to a specific version (e.g. https://github.com/TheSylence/changey/releases/tag/0.3)
+
+When using an "unknown" platform for hosting your project you need to specify a template for generating URLs to compare two versions.
+This template is a single string with `%VARIABLES%` that will be replaced by the tool.
+
+#### Compare Template
+
+A compare template has the following variables:
+- `%URL%` base URL of the project (e.g. https://github.com/TheSylence/changey)
+- `%NEW_VERSION%` name of the later version (e.g. 0.1.2)
+- `%OLD_VERSION%` name of the older version (e.g. 0.1.1)
+
+For example the built in template for github is `%URL%/compare/%OLD_VERSION%...%NEW_VERSION%` 
+
+#### Release Template 
+
+A release template has the following variables:
+- `%URL%` base URL of the project (e.g. https://github.com/TheSylence/changey)
+- `%VERSION%` name of the version to link (e.g. 0.1.2)
+
+For example the built in template for github is `%URL%/releases/tag/%VERSION%`
+
 ### Yanking a release version
 
 `changey yank` will mark the last released version as yanked.
