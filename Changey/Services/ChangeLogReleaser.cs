@@ -63,7 +63,7 @@ internal class ChangeLogReleaser : IChangeLogReleaser
 		}
 		catch (Exception ex)
 		{
-			_logger.Error("Failed to yank version", ex);
+			_logger.Error("Failed to release version", ex);
 			return false;
 		}
 

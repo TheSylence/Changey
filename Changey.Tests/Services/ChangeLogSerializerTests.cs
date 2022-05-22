@@ -307,6 +307,30 @@ public class ChangeLogSerializerTests
     }
 
     [Fact]
+    public async Task DeserializeShouldReadCompareUrlTemplates()
+    {
+        // Arrange
+        var sb = GenerateChangeLogHeader();
+        sb.AppendLine("<!-- Release: %ReleaseTemplate% -->");
+        sb.AppendLine("<!-- Compare: %CompareTemplate% -->");
+        sb.AppendLine("<!-- BaseUrl: Base -->");
+
+        var fileAccess = Substitute.For<IFileAccess>();
+        const string fileName = "path";
+        fileAccess.ReadFromFile(fileName).Returns(Task.FromResult(sb.ToString()));
+
+        var sut = new ChangeLogSerializer(fileAccess);
+
+        // Act
+        var actual = await sut.Deserialize(fileName);
+
+        // Assert
+        Assert.Equal("%ReleaseTemplate%", actual.UrlTemplates.Release);
+        Assert.Equal("%CompareTemplate%", actual.UrlTemplates.Compare);
+        Assert.Equal("Base", actual.UrlTemplates.Base);
+    }
+
+    [Fact]
     public async Task DeserializeShouldReadDeprecated()
     {
         // Arrange
@@ -804,6 +828,42 @@ public class ChangeLogSerializerTests
         Assert.DoesNotContain("semver.org", actual);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task SerializeShouldOnlyIncludeHeaderIfSpecified(bool header)
+    {
+        // Arrange
+        var version = new Version
+        {
+            Name = "1.2.3",
+            ReleaseDate = new DateTime(2021, 2, 3),
+            Added = new List<Change>
+            {
+                new() { Text = "Add Message" }
+            },
+            Fixed = new List<Change>
+            {
+                new() { Text = "Fix Message" }
+            }
+        };
+
+        var fileAccess = new MockFileAccess();
+        var sut = new ChangeLogSerializer(fileAccess);
+
+        // Act
+        await sut.Serialize(version, "", header);
+
+        // Assert
+        var lines = fileAccess.ContentWritten.Split(Environment.NewLine);
+        Assert.Contains(lines, l => l.Contains("Add Message"));
+        Assert.Contains(lines, l => l.Contains("Fix Message"));
+        if (header)
+            Assert.Contains(lines, l => l.Contains("1.2.3"));
+        else
+            Assert.DoesNotContain(lines, l => l.Contains("1.2.3"));
+    }
+
     [Fact]
     public async Task SerializeShouldWriteCompareUrlsWhenHavingMultipleVersion()
     {
@@ -867,40 +927,27 @@ public class ChangeLogSerializerTests
         Assert.Contains("[1.2.3]: http://example.com/1.2.3", actual);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task SerializeShoulOnlydIncludeHeaderIfSpecified(bool header)
+    [Fact]
+    public async Task SerializeShouldWriteCompareUrlTemplates()
     {
         // Arrange
-        var version = new Version
+        var changeLog = new ChangeLog
         {
-            Name = "1.2.3",
-            ReleaseDate = new DateTime(2021, 2, 3),
-            Added = new List<Change>
-            {
-                new() { Text = "Add Message" }
-            },
-            Fixed = new List<Change>
-            {
-                new() { Text = "Fix Message" }
-            }
+            UrlTemplates = new TemplateSet("%ReleaseTemplate%",
+                "%CompareTemplate%", "baseurl")
         };
 
         var fileAccess = new MockFileAccess();
         var sut = new ChangeLogSerializer(fileAccess);
 
         // Act
-        await sut.Serialize(version, "", header);
+        await sut.Serialize(changeLog, "");
 
         // Assert
-        var lines = fileAccess.ContentWritten.Split(Environment.NewLine);
-        Assert.Contains(lines, l => l.Contains("Add Message"));
-        Assert.Contains(lines, l => l.Contains("Fix Message"));
-        if (header)
-            Assert.Contains(lines, l => l.Contains("1.2.3"));
-        else
-            Assert.DoesNotContain(lines, l => l.Contains("1.2.3"));
+        var actual = fileAccess.ContentWritten;
+        Assert.Contains("<!-- Release: %ReleaseTemplate% -->", actual);
+        Assert.Contains("<!-- Compare: %CompareTemplate% -->", actual);
+        Assert.Contains("<!-- BaseUrl: baseurl -->", actual);
     }
 
     [Fact]
