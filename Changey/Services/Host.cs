@@ -2,7 +2,7 @@
 
 internal enum Host
 {
-    None,
-    Github,
-    Gitlab
+	None,
+	Github,
+	Gitlab
 }

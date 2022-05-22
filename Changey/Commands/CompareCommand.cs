@@ -6,18 +6,18 @@ namespace Changey.Commands;
 
 internal class CompareCommand : ICommand
 {
-    public CompareCommand(CompareOption option, ICompareGenerator compareGenerator)
-    {
-        _option = option;
-        _compareGenerator = compareGenerator;
-    }
+	public CompareCommand(CompareOption option, ICompareGenerator compareGenerator)
+	{
+		_option = option;
+		_compareGenerator = compareGenerator;
+	}
 
-    public async Task Execute()
-    {
-        await _compareGenerator.Generate(_option.Path, _option.BaseUrl, _option.CompareTemplate,
-            _option.ReleaseTemplate);
-    }
+	public async Task Execute()
+	{
+		await _compareGenerator.Generate(_option.Path, _option.BaseUrl, _option.CompareTemplate,
+			_option.ReleaseTemplate);
+	}
 
-    private readonly CompareOption _option;
-    private readonly ICompareGenerator _compareGenerator;
+	private readonly CompareOption _option;
+	private readonly ICompareGenerator _compareGenerator;
 }

@@ -7,10 +7,12 @@ namespace Changey.Services;
 
 internal class ChangeLogReleaser : IChangeLogReleaser
 {
-	public ChangeLogReleaser(ILogger logger, IChangeLogSerializer changeLogSerializer)
+	public ChangeLogReleaser(ILogger logger, IChangeLogSerializer changeLogSerializer,
+		ICompareGenerator compareGenerator)
 	{
 		_logger = logger;
 		_changeLogSerializer = changeLogSerializer;
+		_compareGenerator = compareGenerator;
 	}
 
 	public async Task<bool> Release(string path, string? date, string version, bool forceRelease)
@@ -31,21 +33,23 @@ internal class ChangeLogReleaser : IChangeLogReleaser
 			_logger.Error("No unreleased version found in changelog");
 			return false;
 		}
-			
+
 		if (Version.TryParse(version, out var versionToRelease) && !forceRelease)
 		{
 			var releasedVersions = changeLog.Versions.Where(v => v.ReleaseDate != null).ToList();
-				
+
 			var badVersions = releasedVersions.Where(v => !Version.TryParse(v.Name, out _));
 			if (!badVersions.Any())
 			{
 				var newerVersions = releasedVersions.Where(v => Version.Parse(v.Name) >= versionToRelease).ToList();
 				if (newerVersions.Any())
 				{
-					_logger.Warning("You are trying to release a version that is older than already released version(s)");
+					_logger.Warning(
+						"You are trying to release a version that is older than already released version(s)");
 					foreach (var newerVersion in newerVersions)
 					{
-						_logger.Warning($"Version '{newerVersion.Name}' is newer that version to be released '{versionToRelease}'");
+						_logger.Warning(
+							$"Version '{newerVersion.Name}' is newer that version to be released '{versionToRelease}'");
 					}
 
 					_logger.Warning("Specify -f flag to force releasing this version anyways.");
@@ -67,6 +71,16 @@ internal class ChangeLogReleaser : IChangeLogReleaser
 			return false;
 		}
 
+		if (!changeLog.UrlTemplates.Empty)
+		{
+			var result = await _compareGenerator.Generate(path, changeLog.UrlTemplates.Base,
+				changeLog.UrlTemplates.Compare,
+				changeLog.UrlTemplates.Release);
+
+			if (!result)
+				_logger.Warning("Failed to generate compare URLs for changelog.");
+		}
+
 		return true;
 	}
 
@@ -76,4 +90,5 @@ internal class ChangeLogReleaser : IChangeLogReleaser
 
 	private readonly ILogger _logger;
 	private readonly IChangeLogSerializer _changeLogSerializer;
+	private readonly ICompareGenerator _compareGenerator;
 }

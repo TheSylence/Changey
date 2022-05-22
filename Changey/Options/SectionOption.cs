@@ -11,7 +11,8 @@ internal abstract class SectionOption : BaseOption
 		Message = message;
 	}
 
-	[Value(0, Required = true, HelpText = "The message that should be added to the section", MetaName = nameof(Message))]
+	[Value(0, Required = true, HelpText = "The message that should be added to the section",
+		MetaName = nameof(Message))]
 	public string Message { get; }
 
 	internal abstract Section Section { get; }

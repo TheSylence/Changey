@@ -24,7 +24,8 @@ internal class ExtractOption : BaseOption
 		{
 			yield return new Example("Extract all changes for version 1.2.3 and store them in a file called version.md",
 				new ExtractOption(false, "version.md", "1.2.3", string.Empty, false, false));
-			yield return new Example("Extract all changes for version 1.1 into a file valled 1.1.md and include the version header",
+			yield return new Example(
+				"Extract all changes for version 1.1 into a file valled 1.1.md and include the version header",
 				new ExtractOption(true, "1.1.md", "1.1", string.Empty, false, false));
 		}
 	}

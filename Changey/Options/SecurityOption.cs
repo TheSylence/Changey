@@ -17,6 +17,6 @@ internal class SecurityOption : SectionOption
 	[Usage(ApplicationAlias = "changey")]
 	[UsedImplicitly]
 	public static IEnumerable<Example> Examples => ExampleBuilder.ExamplesFor<SecurityOption>();
-		
+
 	internal override Section Section => Section.Security;
 }

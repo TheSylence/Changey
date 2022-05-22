@@ -1,8 +1,8 @@
 {
-    "profiles": {
-        "Changey": {
-            "commandName": "Project",
-            "commandLineArgs": "init"
-        }
+  "profiles": {
+    "Changey": {
+      "commandName": "Project",
+      "commandLineArgs": "init"
     }
+  }
 }

@@ -71,7 +71,7 @@ internal class SectionAdder : ISectionAdder
 			return false;
 		}
 
-		list.Add(new Change {Text = message});
+		list.Add(new Change { Text = message });
 		return true;
 	}
 

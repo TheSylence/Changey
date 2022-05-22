@@ -15,12 +15,12 @@ internal static class ExampleBuilder
 
 		var examples = new Dictionary<string, string>
 		{
-			{"Add sentence as message to section", "Hello, World!"}
+			{ "Add sentence as message to section", "Hello, World!" }
 		};
 
 		foreach (var (helpText, message) in examples)
 		{
-			var obj = ctor.Invoke(new object[] {message, string.Empty, false, false});
+			var obj = ctor.Invoke(new object[] { message, string.Empty, false, false });
 			yield return new Example(helpText, obj);
 		}
 	}

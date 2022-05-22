@@ -62,7 +62,8 @@ internal class IntegrationTestRunner
 
 	private class IntegrationTestRunPass
 	{
-		public IntegrationTestRunPass(string command, Func<string, IEnumerable<string>> validator, bool autoAppendChangelogPath)
+		public IntegrationTestRunPass(string command, Func<string, IEnumerable<string>> validator,
+			bool autoAppendChangelogPath)
 		{
 			_command = AppendChangeLogPath(command, autoAppendChangelogPath);
 			_validator = validator;
