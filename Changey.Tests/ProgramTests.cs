@@ -62,6 +62,7 @@ public class ProgramTests
 	[InlineData("fix")]
 	[InlineData("deprecate")]
 	[InlineData("extract")]
+	[InlineData("compare")]
 	public async Task HelpScreenShouldContainExamples(string command)
 	{
 		// Arrange

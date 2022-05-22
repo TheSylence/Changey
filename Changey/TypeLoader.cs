@@ -7,70 +7,78 @@ using Changey.Services;
 namespace Changey;
 
 internal class TypeLoader
-	: ITypeLoader
+    : ITypeLoader
 {
-	public TypeLoader()
-	{
-		var fileAccess = new FileAccess();
-		_changeLogSerializer = new ChangeLogSerializer(fileAccess);
-	}
+    public TypeLoader()
+    {
+        var fileAccess = new FileAccess();
+        _changeLogSerializer = new ChangeLogSerializer(fileAccess);
+    }
 
-	public ICommand FindCommand(BaseOption option)
-	{
-		return option switch
-		{
-			InitOption i => Init(i),
-			SectionOption s => Section(s),
-			YankOption y => Yank(y),
-			ReleaseOption r => Release(r),
-			ExtractOption e => Extract(e),
-			_ => throw new ArgumentException($"Failed to find command for {option.GetType()}")
-		};
-	}
+    public ICommand FindCommand(BaseOption option)
+    {
+        return option switch
+        {
+            InitOption i => Init(i),
+            SectionOption s => Section(s),
+            YankOption y => Yank(y),
+            ReleaseOption r => Release(r),
+            ExtractOption e => Extract(e),
+            CompareOption c => Compare(c),
+            _ => throw new ArgumentException($"Failed to find command for {option.GetType()}")
+        };
+    }
 
-	public IEnumerable<Type> LoadOptionTypes()
-	{
-		yield return typeof(InitOption);
-		yield return typeof(ReleaseOption);
-		yield return typeof(YankOption);
-		yield return typeof(AddOption);
-		yield return typeof(ChangeOption);
-		yield return typeof(DeprecatedOption);
-		yield return typeof(FixOption);
-		yield return typeof(RemoveOption);
-		yield return typeof(SecurityOption);
-		yield return typeof(ExtractOption);
-	}
+    public IEnumerable<Type> LoadOptionTypes()
+    {
+        yield return typeof(InitOption);
+        yield return typeof(ReleaseOption);
+        yield return typeof(YankOption);
+        yield return typeof(AddOption);
+        yield return typeof(ChangeOption);
+        yield return typeof(DeprecatedOption);
+        yield return typeof(FixOption);
+        yield return typeof(RemoveOption);
+        yield return typeof(SecurityOption);
+        yield return typeof(ExtractOption);
+        yield return typeof(CompareOption);
+    }
 
-	private ICommand Extract(ExtractOption extractOption)
-	{
-		var extractor = new Extractor(extractOption.Logger, _changeLogSerializer);
-		return new ExtractCommand(extractOption, extractor);
-	}
+    private ICommand Compare(CompareOption compareOption)
+    {
+        var generator = new CompareGenerator(compareOption.Logger, _changeLogSerializer);
+        return new CompareCommand(compareOption, generator);
+    }
 
-	private ICommand Init(InitOption option)
-	{
-		var changeLogCreator = new ChangeLogCreator(option.Logger, _changeLogSerializer);
-		return new InitCommand(option, changeLogCreator);
-	}
+    private ICommand Extract(ExtractOption extractOption)
+    {
+        var extractor = new Extractor(extractOption.Logger, _changeLogSerializer);
+        return new ExtractCommand(extractOption, extractor);
+    }
 
-	private ICommand Release(ReleaseOption releaseOption)
-	{
-		var changeLogReleaser = new ChangeLogReleaser(releaseOption.Logger, _changeLogSerializer);
-		return new ReleaseCommand(releaseOption, changeLogReleaser);
-	}
+    private ICommand Init(InitOption option)
+    {
+        var changeLogCreator = new ChangeLogCreator(option.Logger, _changeLogSerializer);
+        return new InitCommand(option, changeLogCreator);
+    }
 
-	private ICommand Section(SectionOption sectionOption)
-	{
-		var sectionAdder = new SectionAdder(_changeLogSerializer, sectionOption.Logger);
-		return new SectionCommand(sectionOption, sectionAdder);
-	}
+    private ICommand Release(ReleaseOption releaseOption)
+    {
+        var changeLogReleaser = new ChangeLogReleaser(releaseOption.Logger, _changeLogSerializer);
+        return new ReleaseCommand(releaseOption, changeLogReleaser);
+    }
 
-	private ICommand Yank(YankOption yankOption)
-	{
-		var versionYanker = new VersionYanker(yankOption.Logger, _changeLogSerializer);
-		return new YankCommand(yankOption, versionYanker);
-	}
+    private ICommand Section(SectionOption sectionOption)
+    {
+        var sectionAdder = new SectionAdder(_changeLogSerializer, sectionOption.Logger);
+        return new SectionCommand(sectionOption, sectionAdder);
+    }
 
-	private readonly ChangeLogSerializer _changeLogSerializer;
+    private ICommand Yank(YankOption yankOption)
+    {
+        var versionYanker = new VersionYanker(yankOption.Logger, _changeLogSerializer);
+        return new YankCommand(yankOption, versionYanker);
+    }
+
+    private readonly ChangeLogSerializer _changeLogSerializer;
 }

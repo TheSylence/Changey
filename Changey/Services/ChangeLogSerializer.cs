@@ -70,6 +70,17 @@ internal class ChangeLogSerializer : IChangeLogSerializer
         listToAdd?.Add(new Change { Text = changeText });
     }
 
+    private static int FindCompareLinks(IList<string> lines, int offset)
+    {
+        for (var i = offset; i < lines.Count; ++i)
+        {
+            if (lines[i].StartsWith('['))
+                return i;
+        }
+
+        return -1;
+    }
+
     private static int FindHeader(IList<string> lines)
     {
         for (var i = 0; i < lines.Count; ++i)
@@ -119,7 +130,13 @@ internal class ChangeLogSerializer : IChangeLogSerializer
     {
         for (var i = offset; i < lines.Count; ++i)
         {
-            ParseCompareLink(lines[i], changeLog);
+            var line = lines[i];
+            var isTemplate = line.StartsWith("<!--");
+
+            if (isTemplate)
+                ParseTemplate(line, changeLog);
+            else
+                ParseCompareLink(line, changeLog);
         }
     }
 
@@ -180,6 +197,26 @@ internal class ChangeLogSerializer : IChangeLogSerializer
         return -1;
     }
 
+    private static void ParseTemplate(string line, ChangeLog changeLog)
+    {
+        line = line.Replace("<!--", "").Replace("-->", "").Trim();
+        var parts = line.Split(':', 2);
+        var template = parts[1].Trim();
+
+        switch (parts[0].Trim())
+        {
+            case "Release":
+                changeLog.UrlTemplates = changeLog.UrlTemplates with { Release = template };
+                break;
+            case "Compare":
+                changeLog.UrlTemplates = changeLog.UrlTemplates with { Compare = template };
+                break;
+            case "BaseUrl":
+                changeLog.UrlTemplates = changeLog.UrlTemplates with { Base = template };
+                break;
+        }
+    }
+
     private static int ParseVersion(IList<string> lines, int offset, ChangeLog changeLog)
     {
         offset = FindVersion(lines, offset);
@@ -208,10 +245,10 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 
         var nextVersionOffset = FindVersion(lines, offset + 1);
         var compareLinksStart = FindCompareLinks(lines, offset + 1);
-        nextVersionOffset = nextVersionOffset < 0 
-            ? compareLinksStart < 0 
-                ? lines.Count 
-                : compareLinksStart 
+        nextVersionOffset = nextVersionOffset < 0
+            ? compareLinksStart < 0
+                ? lines.Count
+                : compareLinksStart
             : nextVersionOffset;
 
         var nextSectionOffset = offset;
@@ -225,17 +262,6 @@ internal class ChangeLogSerializer : IChangeLogSerializer
         offset = nextVersionOffset - 1;
 
         return offset;
-    }
-
-    private static int FindCompareLinks(IList<string> lines, int offset)
-    {
-        for (var i = offset; i < lines.Count; ++i)
-        {
-            if (lines[i].StartsWith('['))
-                return i;
-        }
-
-        return -1;
     }
 
     private static int ParseVersions(IList<string> lines, int offset, ChangeLog changeLog)
@@ -271,6 +297,8 @@ internal class ChangeLogSerializer : IChangeLogSerializer
         {
             WriteCompareLink(sb, version);
         }
+
+        WriteUrlTemplates(sb, changeLog);
 
         return sb.ToString();
     }
@@ -325,6 +353,16 @@ internal class ChangeLogSerializer : IChangeLogSerializer
             sb.AppendLine(".");
 
         sb.AppendLine();
+    }
+
+    private static void WriteUrlTemplates(StringBuilder sb, ChangeLog changeLog)
+    {
+        if (!string.IsNullOrEmpty(changeLog.UrlTemplates.Release))
+            sb.AppendLine($"<!-- Release: {changeLog.UrlTemplates.Release} -->");
+        if (!string.IsNullOrEmpty(changeLog.UrlTemplates.Compare))
+            sb.AppendLine($"<!-- Compare: {changeLog.UrlTemplates.Compare} -->");
+        if (!string.IsNullOrEmpty(changeLog.UrlTemplates.Base))
+            sb.AppendLine($"<!-- BaseUrl: {changeLog.UrlTemplates.Base} -->");
     }
 
     private static void WriteVersion(StringBuilder sb, Version version, bool includeHeader)
