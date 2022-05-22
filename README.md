@@ -3,6 +3,7 @@
 ![Nuget](https://img.shields.io/nuget/v/Changey) 
 [![CI Build](https://github.com/TheSylence/Changey/actions/workflows/ci.yml/badge.svg)](https://github.com/TheSylence/Changey/actions/workflows/ci.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9d1b30c3f4014291af9b8a9b2791d829)](https://www.codacy.com/gh/TheSylence/Changey/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheSylence/Changey&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/9d1b30c3f4014291af9b8a9b2791d829)](https://www.codacy.com/gh/TheSylence/Changey/dashboard?utm_source=github.com&utm_medium=referral&utm_content=TheSylence/Changey&utm_campaign=Badge_Coverage)
 ![GitHub](https://img.shields.io/github/license/TheSylence/changey)
 
 Manage your changelogs by adhering to the https://keepachangelog.com/en/1.1.0/ standard.
