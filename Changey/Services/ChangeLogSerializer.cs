@@ -37,6 +37,7 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 			return changeLog;
 
 		ParseCompareLinks(lines, offset, changeLog);
+		ParseVariables(lines, changeLog);
 
 		return changeLog;
 	}
@@ -114,6 +115,12 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 		return -1;
 	}
 
+	private static bool IsVariable(string line)
+	{
+		var trimmed = line.Trim();
+		return trimmed.StartsWith("<!-- ") && trimmed.EndsWith("-->");
+	}
+
 	private static void ParseCompareLink(string line, ChangeLog changeLog)
 	{
 		var parts = line.Split(':', 2);
@@ -131,12 +138,7 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 		for (var i = offset; i < lines.Count; ++i)
 		{
 			var line = lines[i];
-			var isTemplate = line.StartsWith("<!--");
-
-			if (isTemplate)
-				ParseTemplate(line, changeLog);
-			else
-				ParseCompareLink(line, changeLog);
+			ParseCompareLink(line, changeLog);
 		}
 	}
 
@@ -214,6 +216,14 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 			case "BaseUrl":
 				changeLog.UrlTemplates = changeLog.UrlTemplates with { Base = template };
 				break;
+		}
+	}
+
+	private static void ParseVariables(IList<string> lines, ChangeLog changeLog)
+	{
+		foreach (var line in lines.Where(IsVariable))
+		{
+			ParseTemplate(line, changeLog);
 		}
 	}
 
@@ -298,7 +308,7 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 			WriteCompareLink(sb, version);
 		}
 
-		WriteUrlTemplates(sb, changeLog);
+		WriteVariables(sb, changeLog);
 
 		return sb.ToString();
 	}
@@ -363,6 +373,11 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 			sb.AppendLine($"<!-- Compare: {changeLog.UrlTemplates.Compare} -->");
 		if (!string.IsNullOrEmpty(changeLog.UrlTemplates.Base))
 			sb.AppendLine($"<!-- BaseUrl: {changeLog.UrlTemplates.Base} -->");
+	}
+
+	private static void WriteVariables(StringBuilder sb, ChangeLog changeLog)
+	{
+		WriteUrlTemplates(sb, changeLog);
 	}
 
 	private static void WriteVersion(StringBuilder sb, Version version, bool includeHeader)

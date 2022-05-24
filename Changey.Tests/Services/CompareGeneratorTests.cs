@@ -104,7 +104,7 @@ public class CompareGeneratorTests
 
 		// Assert
 		Assert.True(result);
-		const string expectedUrl = BaseUrl + "/releases/tag/0.1";
+		const string expectedUrl = "https://" + BaseUrl + "/releases/tag/0.1";
 		Assert.Equal(expectedUrl, existingChangeLog.Versions[0].CompareUrl);
 	}
 
@@ -131,8 +131,8 @@ public class CompareGeneratorTests
 		// Assert
 		Assert.True(result);
 		Assert.Collection(existingChangeLog.Versions.Select(v => v.CompareUrl),
-			url => Assert.Equal(BaseUrl + "/compare/0.1...HEAD", url),
-			url => Assert.Equal(BaseUrl + "/releases/tag/0.1", url)
+			url => Assert.Equal("https://" + BaseUrl + "/compare/0.1...HEAD", url),
+			url => Assert.Equal("https://" + BaseUrl + "/releases/tag/0.1", url)
 		);
 	}
 
@@ -164,9 +164,9 @@ public class CompareGeneratorTests
 		// Assert
 		Assert.True(result);
 		Assert.Collection(existingChangeLog.Versions.Select(v => v.CompareUrl),
-			url => Assert.Equal(BaseUrl + "/compare/0.2...HEAD", url),
-			url => Assert.Equal(BaseUrl + "/compare/0.1...0.2", url),
-			url => Assert.Equal(BaseUrl + "/releases/tag/0.1", url)
+			url => Assert.Equal("https://" + BaseUrl + "/compare/0.2...HEAD", url),
+			url => Assert.Equal("https://" + BaseUrl + "/compare/0.1...0.2", url),
+			url => Assert.Equal("https://" + BaseUrl + "/releases/tag/0.1", url)
 		);
 	}
 
