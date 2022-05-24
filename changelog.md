@@ -30,3 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Display correct version when invoking tool (#20)
 
+
+[Unreleased]: https://github.com/TheSylence/changey/compare/0.3...HEAD
+[0.3]: https://github.com/TheSylence/changey/compare/0.2...0.3
+[0.2]: https://github.com/TheSylence/changey/compare/0.1.2...0.2
+[0.1.2]: https://github.com/TheSylence/changey/releases/tag/0.1.2
+<!-- Release: %URL%/releases/tag/%VERSION% -->
+<!-- Compare: %URL%/compare/%OLD_VERSION%...%NEW_VERSION% -->
+<!-- BaseUrl: https://github.com/TheSylence/changey -->

@@ -7,6 +7,34 @@ namespace Changey.Tests;
 
 public class IntegrationTests
 {
+	[Fact]
+	public async Task CompareUrlsTest()
+	{
+		// Arrange
+		await using var writer = new StringWriter();
+		var sut = new Program(null, writer);
+
+		var test = new IntegrationTestRunner(sut);
+
+		test.AddPass("init", Array.Empty<string>(), Array.Empty<string>());
+		test.AddPass("compare -b github.com/TheSylence/changey",
+			new[] { "github.com/TheSylence/changey", "Release:", "BaseUrl:", "Compare:" }, Array.Empty<string>());
+		test.AddPass("add addmessage", new[] { "addmessage" }, Array.Empty<string>());
+		test.AddPass("release 1.0", Array.Empty<string>(), Array.Empty<string>());
+		test.AddPass("add nextmessage", new[] { "nextmessage" }, Array.Empty<string>());
+		test.AddPass("release 1.1", new[]
+		{
+			"https://github.com/TheSylence/changey/releases/tag/1.0",
+			"https://github.com/TheSylence/changey/compare/1.0...1.1"
+		}, Array.Empty<string>());
+
+		// Act
+		var actual = await test.Run(nameof(CompareUrlsTest) + "_changelog.md");
+
+		// Assert
+		Assert.Empty(actual);
+	}
+
 	[Theory]
 	[InlineData(true)]
 	[InlineData(false)]

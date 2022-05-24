@@ -24,6 +24,7 @@ internal class CompareTemplateRepository
 
 	public TemplateSet? TemplateFor(string baseUrl)
 	{
+		baseUrl = PrepareBaseUrl(baseUrl);
 		var host = DetermineHost(baseUrl);
 
 		return _templates.TryGetValue(host, out var template)
@@ -31,16 +32,18 @@ internal class CompareTemplateRepository
 			: null;
 	}
 
+	private static string PrepareBaseUrl(string baseUrl)
+	{
+		if (!baseUrl.StartsWith("https://"))
+			return "https://" + baseUrl;
+
+		return baseUrl;
+	}
+
 	private Host DetermineHost(string url)
 	{
 		if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-		{
-			if (!url.StartsWith("https://"))
-				url = "https://" + url;
-
-			if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-				return Host.None;
-		}
+			return Host.None;
 
 		return _hostMap.TryGetValue(uri.Host, out var host)
 			? host
