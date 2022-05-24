@@ -40,17 +40,17 @@ internal class CompareGenerator : ICompareGenerator
 
 		var changeLog = await _changeLogSerializer.Deserialize(path);
 
-		if (GenerateUrls(changeLog, template))
+		if (!GenerateUrls(changeLog, template))
+			return true;
+		
+		try
 		{
-			try
-			{
-				await _changeLogSerializer.Serialize(changeLog, path);
-			}
-			catch (Exception ex)
-			{
-				_logger.Error($"Failed to write changelog to {path}", ex);
-				return false;
-			}
+			await _changeLogSerializer.Serialize(changeLog, path);
+		}
+		catch (Exception ex)
+		{
+			_logger.Error($"Failed to write changelog to {path}", ex);
+			return false;
 		}
 
 		return true;
@@ -86,16 +86,14 @@ internal class CompareGenerator : ICompareGenerator
 			var newVersion = allVersions[i];
 			var previousVersion = allVersions[i + 1];
 
-			if (newVersion.ReleaseDate == null)
-				newVersion.CompareUrl = GenerateLatestCompareUrl(previousVersion, templateSet);
-			else
-				newVersion.CompareUrl = GenerateCompareUrl(newVersion, previousVersion, templateSet);
+			newVersion.CompareUrl = newVersion.ReleaseDate == null 
+				? GenerateLatestCompareUrl(previousVersion, templateSet) 
+				: GenerateCompareUrl(newVersion, previousVersion, templateSet);
 		}
 
-		if (allVersions[^1].ReleaseDate != null)
-			allVersions[^1].CompareUrl = GenerateReleaseUrl(allVersions[^1], templateSet);
-		else
-			allVersions[^1].CompareUrl = string.Empty;
+		allVersions[^1].CompareUrl = allVersions[^1].ReleaseDate != null 
+			? GenerateReleaseUrl(allVersions[^1], templateSet) 
+			: string.Empty;
 
 		return true;
 	}

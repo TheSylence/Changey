@@ -170,12 +170,11 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 		{
 			if (string.IsNullOrWhiteSpace(lines[i]))
 			{
-				if (sb.Length > 0)
-				{
-					AddChange(version, sectionName, sb.ToString());
-					sb.Clear();
-				}
-
+				if (sb.Length <= 0)
+					return i;
+				
+				AddChange(version, sectionName, sb.ToString());
+				sb.Clear();
 				return i;
 			}
 
@@ -205,21 +204,16 @@ internal class ChangeLogSerializer : IChangeLogSerializer
 		var parts = line.Split(':', 2);
 		var template = parts[1].Trim();
 
-		switch (parts[0].Trim())
+		changeLog.UrlTemplates = parts[0].Trim() switch
 		{
-			case "Release":
-				changeLog.UrlTemplates = changeLog.UrlTemplates with { Release = template };
-				break;
-			case "Compare":
-				changeLog.UrlTemplates = changeLog.UrlTemplates with { Compare = template };
-				break;
-			case "BaseUrl":
-				changeLog.UrlTemplates = changeLog.UrlTemplates with { Base = template };
-				break;
-		}
+			"Release" => changeLog.UrlTemplates with { Release = template },
+			"Compare" => changeLog.UrlTemplates with { Compare = template },
+			"BaseUrl" => changeLog.UrlTemplates with { Base = template },
+			_ => changeLog.UrlTemplates
+		};
 	}
 
-	private static void ParseVariables(IList<string> lines, ChangeLog changeLog)
+	private static void ParseVariables(IEnumerable<string> lines, ChangeLog changeLog)
 	{
 		foreach (var line in lines.Where(IsVariable))
 		{

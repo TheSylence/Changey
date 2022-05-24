@@ -77,17 +77,17 @@ internal class IntegrationTestRunner
 
 		public IEnumerable<string> Validate(string content) => _validator(content);
 
-		private string AppendChangeLogPath(string command, bool append)
+		private static string AppendChangeLogPath(string command, bool append)
 		{
 			if (!append)
 				return command;
 
-			return command + " -p %changelogpath%";
+			return command + @" -p %changelogpath%";
 		}
 
 		private IEnumerable<string> SplitCommandArgs(string changeLogPath)
 		{
-			var command = _command.Replace("%changelogpath%", changeLogPath);
+			var command = _command.Replace(@"%changelogpath%", changeLogPath);
 
 			var parts = command.Split(' ');
 			var sb = new StringBuilder();
@@ -102,7 +102,7 @@ internal class IntegrationTestRunner
 				}
 				else if (part.EndsWith('\"'))
 				{
-					sb.Append(" ");
+					sb.Append(' ');
 					sb.Append(part.Trim('\"'));
 					yield return sb.ToString();
 					sb.Clear();
@@ -112,7 +112,7 @@ internal class IntegrationTestRunner
 				{
 					if (inQuotes)
 					{
-						sb.Append(" ");
+						sb.Append(' ');
 						sb.Append(part);
 					}
 					else

@@ -12,6 +12,28 @@ namespace Changey.Tests.Services;
 
 public class ChangeLogReleaserTests
 {
+	private static void AddUnreleasedVersionTo(ChangeLog existingChangeLog)
+	{
+		existingChangeLog.Versions.Add(new Version
+		{
+			ReleaseDate = null
+		});
+	}
+
+	private static ChangeLogReleaser GenerateSut(ChangeLog existingChangeLog,
+		IChangeLogSerializer? changeLogSerializer = null)
+	{
+		var logger = Substitute.For<ILogger>();
+		if (changeLogSerializer == null)
+		{
+			changeLogSerializer = Substitute.For<IChangeLogSerializer>();
+			changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
+		}
+
+		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
+		return sut;
+	}
+
 	[Fact]
 	public async Task ReleaseShouldFailWhenNoUnreleasedVersionIsPresent()
 	{
@@ -22,11 +44,7 @@ public class ChangeLogReleaserTests
 			ReleaseDate = DateTime.Now
 		});
 
-		var logger = Substitute.For<ILogger>();
-		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-		changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
-
+		var sut = GenerateSut(existingChangeLog);
 		var fileName = Path.GetTempFileName();
 
 		// Act
@@ -48,19 +66,11 @@ public class ChangeLogReleaserTests
 			ReleaseDate = DateTime.Now,
 			Name = "1.0.0"
 		});
-		existingChangeLog.Versions.Add(new Version
-		{
-			ReleaseDate = null
-		});
+		AddUnreleasedVersionTo(existingChangeLog);
 
 		const string version = "0.9.0";
 		var fileName = Path.GetTempFileName();
-
-		var logger = Substitute.For<ILogger>();
-		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
-		changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
-
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
+		var sut = GenerateSut(existingChangeLog);
 
 		// Act
 		var actual = await sut.Release(fileName, null, version, force);
@@ -74,17 +84,13 @@ public class ChangeLogReleaserTests
 	{
 		// Arrange
 		var existingChangeLog = new ChangeLog();
-		existingChangeLog.Versions.Add(new Version
-		{
-			ReleaseDate = null
-		});
+		AddUnreleasedVersionTo(existingChangeLog);
 
-		var logger = Substitute.For<ILogger>();
 		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
 		changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(Task.FromResult(existingChangeLog));
 		changeLogSerializer.Serialize(Arg.Any<ChangeLog>(), Arg.Any<string>())
 			.Returns(Task.FromException(new Exception("test-exception")));
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
+		var sut = GenerateSut(existingChangeLog, changeLogSerializer);
 
 		// Act
 		var ex = await Record.ExceptionAsync(async () => await sut.Release("", null, "1", false));
@@ -101,22 +107,18 @@ public class ChangeLogReleaserTests
 		{
 			UrlTemplates = new TemplateSet("release", "compare", "base")
 		};
-		existingChangeLog.Versions.Add(new Version
-		{
-			ReleaseDate = null
-		});
+		AddUnreleasedVersionTo(existingChangeLog);
 
 		const string version = "0.9.0";
 		var fileName = Path.GetTempFileName();
 
-		var logger = Substitute.For<ILogger>();
 		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
 		changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
 		var compareGenerator = Substitute.For<ICompareGenerator>();
 		compareGenerator.Generate(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 			.Returns(true);
 
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, compareGenerator);
+		var sut = GenerateSut(existingChangeLog, changeLogSerializer);
 
 		// Act
 		var actual = await sut.Release(fileName, null, version, false);
@@ -131,15 +133,11 @@ public class ChangeLogReleaserTests
 	{
 		// Arrange
 		var existingChangeLog = new ChangeLog();
-		existingChangeLog.Versions.Add(new Version
-		{
-			ReleaseDate = null
-		});
+		AddUnreleasedVersionTo(existingChangeLog);
 
-		var logger = Substitute.For<ILogger>();
 		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
 		changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
+		var sut = GenerateSut(existingChangeLog, changeLogSerializer);
 
 		var fileName = Path.GetTempFileName();
 		const string version = "1.2.3";
@@ -160,15 +158,11 @@ public class ChangeLogReleaserTests
 	{
 		// Arrange
 		var existingChangeLog = new ChangeLog();
-		existingChangeLog.Versions.Add(new Version
-		{
-			ReleaseDate = null
-		});
+		AddUnreleasedVersionTo(existingChangeLog);
 
-		var logger = Substitute.For<ILogger>();
 		var changeLogSerializer = Substitute.For<IChangeLogSerializer>();
 		changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
+		var sut = GenerateSut(existingChangeLog, changeLogSerializer);
 
 		var fileName = Path.GetTempFileName();
 		const string version = "1.2.3";

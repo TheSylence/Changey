@@ -26,8 +26,7 @@ internal class VersionYanker : IVersionYanker
 			return false;
 		}
 
-		var latestVersion = changeLog.Versions.Where(v => v.ReleaseDate.HasValue)
-			.OrderByDescending(v => v.ReleaseDate!.Value).FirstOrDefault();
+		var latestVersion = changeLog.Versions.Where(v => v.ReleaseDate.HasValue).MaxBy(v => v.ReleaseDate!.Value);
 
 		if (latestVersion == null)
 		{

@@ -19,9 +19,9 @@ public class IntegrationTests
 		test.AddPass("init", Array.Empty<string>(), Array.Empty<string>());
 		test.AddPass("compare -b github.com/TheSylence/changey",
 			new[] { "github.com/TheSylence/changey", "Release:", "BaseUrl:", "Compare:" }, Array.Empty<string>());
-		test.AddPass("add addmessage", new[] { "addmessage" }, Array.Empty<string>());
+		test.AddPass(@"add addmessage", new[] { @"addmessage" }, Array.Empty<string>());
 		test.AddPass("release 1.0", Array.Empty<string>(), Array.Empty<string>());
-		test.AddPass("add nextmessage", new[] { "nextmessage" }, Array.Empty<string>());
+		test.AddPass(@"add nextmessage", new[] { @"nextmessage" }, Array.Empty<string>());
 		test.AddPass("release 1.1", new[]
 		{
 			"https://github.com/TheSylence/changey/releases/tag/1.0",
@@ -50,11 +50,8 @@ public class IntegrationTests
 		test.AddPass("init", new[] { "changelog" }, Array.Empty<string>());
 		test.AddPass("add \"Change message\"", new[] { "Change message" }, Array.Empty<string>());
 		test.AddPass("release 0.9.1", new[] { "0.9.1" }, Array.Empty<string>());
-
-		if (header)
-			test.AddPass("extract 0.9.1 -t output.md -h", Array.Empty<string>(), Array.Empty<string>());
-		else
-			test.AddPass("extract 0.9.1 -t output.md", Array.Empty<string>(), Array.Empty<string>());
+		test.AddPass(header ? "extract 0.9.1 -t output.md -h" : "extract 0.9.1 -t output.md", Array.Empty<string>(),
+			Array.Empty<string>());
 
 		// Act
 		var actual = await test.Run(nameof(ExtractionTest) + "_changelog.md");
