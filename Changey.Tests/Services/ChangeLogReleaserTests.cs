@@ -21,7 +21,7 @@ public class ChangeLogReleaserTests
 	}
 
 	private static ChangeLogReleaser GenerateSut(ChangeLog existingChangeLog,
-		IChangeLogSerializer? changeLogSerializer = null)
+		IChangeLogSerializer? changeLogSerializer = null, ICompareGenerator? compareGenerator = null)
 	{
 		var logger = Substitute.For<ILogger>();
 		if (changeLogSerializer == null)
@@ -30,7 +30,8 @@ public class ChangeLogReleaserTests
 			changeLogSerializer.Deserialize(Arg.Any<string>()).Returns(existingChangeLog);
 		}
 
-		var sut = new ChangeLogReleaser(logger, changeLogSerializer, Substitute.For<ICompareGenerator>());
+		compareGenerator ??= Substitute.For<ICompareGenerator>();
+		var sut = new ChangeLogReleaser(logger, changeLogSerializer, compareGenerator);
 		return sut;
 	}
 
@@ -118,7 +119,7 @@ public class ChangeLogReleaserTests
 		compareGenerator.Generate(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 			.Returns(true);
 
-		var sut = GenerateSut(existingChangeLog, changeLogSerializer);
+		var sut = GenerateSut(existingChangeLog, changeLogSerializer, compareGenerator);
 
 		// Act
 		var actual = await sut.Release(fileName, null, version, false);
