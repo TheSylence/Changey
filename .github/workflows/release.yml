@@ -32,7 +32,7 @@ jobs:
       run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.tagName.outputs.tag }} /p:Version=${{ steps.tagName.outputs.tag }} /p:FileVersion=${{ steps.tagName.outputs.tag }} /p:AssemblyVersion=${{ steps.tagName.outputs.tag }}
 
     - name: Push nuget package
-      run: dotnet nuget push ./Changey/nupkg/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_KEY }} --no-symbols true -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push ./Changey/nupkg/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_KEY }} --no-symbols -s https://api.nuget.org/v3/index.json
       
     - name: Extract changelog
       run: dotnet Changey/bin/Release/net6.0/Changey.dll extract ${{ steps.tagName.outputs.tag }} -t Changey/nupkg/changelog.md
