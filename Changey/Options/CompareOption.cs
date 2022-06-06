@@ -19,13 +19,10 @@ internal class CompareOption : BaseOption
 		ReleaseTemplate = releaseTemplate;
 	}
 
-	[Option('b',
-		HelpText =
-			"Base url for generated links. When using github.com or gitlab.com release and compare templates are automatically determined.",
-		Required = true)]
+	[Option('b', HelpText = CompareOptionTexts.BaseUrl, Required = true)]
 	public string BaseUrl { get; }
 
-	[Option('c', HelpText = "Template for an URL that compares two tags. Only needed when using an unknown base url.")]
+	[Option('c', HelpText = CompareOptionTexts.CompareTemplate)]
 	public string CompareTemplate { get; }
 
 	[Usage(ApplicationAlias = "changey")]
@@ -46,7 +43,6 @@ internal class CompareOption : BaseOption
 		}
 	}
 
-	[Option('r',
-		HelpText = "Template for an URL that directly links to a release. Only needed when using an unknown base url.")]
+	[Option('r', HelpText = CompareOptionTexts.ReleaseTemplate)]
 	public string ReleaseTemplate { get; }
 }

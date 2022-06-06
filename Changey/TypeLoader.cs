@@ -59,7 +59,8 @@ internal class TypeLoader
 	private ICommand Init(InitOption option)
 	{
 		var changeLogCreator = new ChangeLogCreator(option.Logger, _changeLogSerializer);
-		return new InitCommand(option, changeLogCreator);
+		var generator = new CompareGenerator(option.Logger, _changeLogSerializer);
+		return new InitCommand(option, changeLogCreator, generator);
 	}
 
 	private ICommand Release(ReleaseOption releaseOption)

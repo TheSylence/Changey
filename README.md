@@ -32,6 +32,13 @@ These options can be used with all commands:
 This is required before using any other commands.
 It will fail when the changelog already exists unless the `-o` option is set.
 
+You can set up compare URLs when initializing a new changelog.
+To do so pass the `-b BASEURL` argument (and possibly `-c` and `-r`):
+
+`changey init -b https://github.com/TheSylence/changey`
+
+See [Version links](#version-links) for further information on these URLs.
+
 ### Releasing a version
 
 `changey release 1.2.3` will add a 1.2.3 as a released version to the changelog.
